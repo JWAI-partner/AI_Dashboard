@@ -5,28 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI_Dashboard · AI 研究入口</title>
 <meta name="robots" content="noindex, nofollow, noarchive">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c1d1f'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='13' font-weight='700' fill='%23fff' text-anchor='middle'%3EAI%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='13' font-weight='700' fill='%23e8b72a' text-anchor='middle'%3EAI%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f6f2;
-    --surface: #ffffff;
-    --ink: #1c1d1f;
-    --ink-2: #55585e;
-    --ink-3: #8a8d93;
-    --line: #e4e2dc;
-    --accent: #1f5fbf;
-    --accent-soft: #e8f0fb;
-    --html: #1f7a4d;
-    --html-soft: #e6f4ec;
-    --ok: #1f7a4d;
-    --ok-soft: #e6f4ec;
+    --bg: #000000;
+    --surface: #101113;
+    --surface-2: #17181b;
+    --ink: #f4f4f2;
+    --ink-2: #b9bcc2;
+    --ink-3: #777b83;
+    --line: #26282c;
+    --accent: #e8b72a;
+    --accent-soft: rgba(232, 183, 42, 0.12);
+    --ok: #4ade80;
+    --ok-soft: rgba(74, 222, 128, 0.12);
     --no: #777b83;
-    --no-soft: #eef0f2;
-    --warn: #b4412b;
-    --warn-soft: #fbece8;
+    --no-soft: rgba(119, 123, 131, 0.15);
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
@@ -38,55 +35,95 @@
     font-size: 16px;
     line-height: 1.6;
   }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 56px 16px 64px; }
+  a { color: var(--accent); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 48px 16px 64px; }
 
-  header .eyebrow {
+  /* ---- 頂部 ---- */
+  header.top .eyebrow {
     font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
     color: var(--ink-3); margin: 0 0 8px;
   }
-  header h1 { margin: 0 0 8px; font-size: 32px; }
-  header p { margin: 0 0 4px; color: var(--ink-2); }
-  header .ai-note { font-weight: 700; color: var(--ink); }
+  header.top h1 { margin: 0 0 4px; font-size: 30px; font-weight: 900; }
+  header.top .sub { margin: 0; color: var(--ink-2); font-size: 14px; }
 
-  .tools { margin-top: 28px; }
+  /* ---- Hero 聲明卡 ---- */
+  .hero {
+    margin-top: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 26px 24px;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(232,183,42,0.14), rgba(232,183,42,0.02) 70%), var(--surface);
+    font-size: clamp(22px, 5vw, 40px);
+    font-weight: 900;
+    line-height: 1.4;
+  }
+  .hero span { color: var(--accent); }
+
+  /* ---- 搜尋列 ---- */
+  .tools { margin-top: 24px; }
   .search {
     width: 100%; padding: 12px 14px; font-size: 16px;
-    border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); color: var(--ink);
     font-family: inherit;
   }
+  .search::placeholder { color: var(--ink-3); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .chip {
     font-family: inherit; font-size: 13px; padding: 4px 12px; border-radius: 999px;
     border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
     cursor: pointer;
   }
-  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
   .count { color: var(--ink-3); font-size: 13px; margin: 12px 0 0; }
 
-  h2.section { margin: 44px 0 4px; font-size: 22px; }
-  p.section-sub { margin: 0 0 16px; color: var(--ink-2); font-size: 14px; }
+  /* ---- 三大分區：各自裝框 ---- */
+  section.panel {
+    margin-top: 28px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  section.panel.gold { border-color: var(--accent); }
+  .panel-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--line); }
+  .panel-head .row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .panel-head .num {
+    font-family: "JetBrains Mono", monospace; font-weight: 500;
+    font-size: 15px; color: var(--accent);
+  }
+  .panel-head h2 { margin: 0; font-size: 22px; font-weight: 900; }
+  .panel-head .n {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-3);
+    border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px;
+  }
+  .panel-head p { margin: 8px 0 0; color: var(--ink-2); font-size: 14px; }
+  .panel-body { padding: 6px 20px 20px; }
   .policy {
-    font-size: 13px; color: var(--warn); background: var(--warn-soft);
-    border: 1px solid #f0d5cd; border-radius: 8px; padding: 8px 12px; margin: 0 0 16px;
+    font-size: 13px; color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid rgba(232,183,42,0.4);
+    border-radius: 8px; padding: 8px 12px; margin: 14px 0 4px;
   }
 
-  /* ---- 工具表：表格框架，每列可展開 ---- */
-  .ttable { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  /* ---- 工具表 ---- */
+  .ttable { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface-2); margin-top: 14px; }
   .ttable .thead, .tool > summary {
     display: grid; grid-template-columns: 44px 1.1fr 2fr auto auto; gap: 12px; align-items: center;
     padding: 12px 14px;
   }
   .ttable .thead {
-    font-size: 12px; color: var(--ink-3); background: #faf9f6;
+    font-size: 12px; color: var(--ink-3); background: #0b0c0e;
     border-bottom: 1px solid var(--line); font-weight: 700;
   }
   .tool { border-bottom: 1px solid var(--line); }
   .tool:last-child { border-bottom: none; }
   .tool > summary { cursor: pointer; list-style: none; }
   .tool > summary::-webkit-details-marker { display: none; }
-  .tool > summary:hover { background: #faf9f6; }
-  .tool > summary::after { content: "＋"; color: var(--ink-3); font-weight: 700; justify-self: end; }
+  .tool > summary:hover { background: rgba(232,183,42,0.05); }
+  .tool > summary::after { content: "＋"; color: var(--accent); font-weight: 700; justify-self: end; }
   .tool[open] > summary::after { content: "－"; }
   .tool .logo { width: 36px; height: 36px; border-radius: 8px; }
   .tool .name { font-weight: 700; }
@@ -97,11 +134,11 @@
   .tool .body h4 { margin: 12px 0 4px; font-size: 14px; color: var(--ink); }
   .tool .body code {
     font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px;
-    background: #f1efe9; padding: 1px 6px; border-radius: 4px;
+    background: #26282c; color: var(--ink); padding: 1px 6px; border-radius: 4px;
   }
   .tool .body pre {
-    background: #1c1d1f; color: #f4f4f2; padding: 12px 14px; border-radius: 8px;
-    overflow-x: auto; font-size: 12.5px;
+    background: #000; color: var(--ink); padding: 12px 14px; border-radius: 8px;
+    overflow-x: auto; font-size: 12.5px; border: 1px solid var(--line);
   }
   .badge {
     font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11.5px; font-weight: 500;
@@ -112,32 +149,34 @@
   .tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .tag { font-size: 12px; color: var(--accent); background: var(--accent-soft); padding: 1px 8px; border-radius: 4px; white-space: nowrap; }
 
-  /* ---- 報告卡 ---- */
+  /* ---- 報告列 ---- */
   ul.list { list-style: none; margin: 0; padding: 0; }
   li.item { border-bottom: 1px solid var(--line); }
+  li.item:last-child { border-bottom: none; }
   li.item a {
     display: grid; grid-template-columns: 110px 1fr auto; gap: 12px;
     padding: 18px 4px; text-decoration: none; color: inherit; align-items: start;
   }
+  li.item a:hover { background: rgba(232,183,42,0.04); }
   li.item a:hover .title { color: var(--accent); text-decoration: underline; }
-  .date { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; color: var(--ink-3); padding-top: 3px; }
-  .title { font-weight: 700; font-size: 17px; }
+  .date { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; color: var(--accent); padding-top: 3px; }
+  .title { font-weight: 700; font-size: 17px; color: var(--ink); }
   .summary { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
   .meta { display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
   .fmt {
     font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11.5px; font-weight: 500;
     padding: 2px 8px; border-radius: 4px; white-space: nowrap;
   }
-  .fmt.html { color: var(--html); background: var(--html-soft); }
+  .fmt.html { color: var(--ok); background: var(--ok-soft); }
   .src { font-size: 12px; color: var(--ink-3); }
   .empty { padding: 32px 8px; color: var(--ink-3); text-align: center; }
 
-  footer { margin-top: 48px; font-size: 13px; color: var(--ink-3); }
+  footer { margin-top: 40px; font-size: 13px; color: var(--ink-3); }
   footer p { margin: 0 0 4px; }
 
   @media (max-width: 700px) {
-    .wrap { padding-top: 36px; }
-    header h1 { font-size: 24px; }
+    .wrap { padding-top: 32px; }
+    header.top h1 { font-size: 24px; }
     .ttable .thead { display: none; }
     .tool > summary { grid-template-columns: 44px 1fr auto; }
     .tool .one, .tool .col-tags { grid-column: 2 / -1; }
@@ -149,12 +188,13 @@
 </head>
 <body>
 <div class="wrap">
-  <header>
+  <header class="top">
     <p class="eyebrow">AI Dashboard · 入口網</p>
     <h1>AI 研究入口</h1>
-    <p class="ai-note">全部研究內容由 AI 生成，僅供參考！</p>
-    <p>工具合集＋研究報告都在這裡。下方搜尋與標籤會同時篩選工具表和報告。</p>
+    <p class="sub">工具合集＋研究報告都在這裡。下方搜尋與標籤會同時篩選三個區域。</p>
   </header>
+
+  <div class="hero">所有內容皆由<span>AI產生</span>，僅供參考</div>
 
   <div class="tools">
     <input class="search" id="q" type="search" placeholder="搜尋工具、報告標題、摘要或標籤…" aria-label="搜尋">
@@ -162,62 +202,80 @@
   </div>
   <p class="count" id="count"></p>
 
-  <h2 class="section">1 · 工具合集</h2>
-  <p class="section-sub">表格為主，點每一列可展開安裝方式與詳細說明。圖片為專案圖示，連結到原 GitHub 專案。</p>
-  <p class="policy">本機安裝狀態僅供檢視。任何安裝／更新都要先經過你的允許才會執行。</p>
-  <div class="ttable" id="tools">
-    <div class="thead"><span></span><span>工具</span><span>一句話</span><span>本機狀態</span><span></span></div>
+  <section class="panel gold" id="panel-tools">
+    <div class="panel-head">
+      <div class="row"><span class="num">01</span><h2>工具合集</h2><span class="n" id="n-tools"></span></div>
+      <p>表格為主，點每一列可展開安裝方式與詳細說明。圖片為專案圖示，連結到原 GitHub 專案。</p>
+    </div>
+    <div class="panel-body">
+      <p class="policy">本機安裝狀態僅供檢視。任何安裝／更新都要先經過你的允許才會執行。</p>
+      <div class="ttable" id="tools">
+        <div class="thead"><span></span><span>工具</span><span>一句話</span><span>本機狀態</span><span></span></div>
 
-    <details class="tool" data-tags="網站發佈 加密 靜態網站" data-search="staticrypt 靜態 HTML 密碼保護 瀏覽器 AES 解密 免伺服器 網站發佈 加密">
-      <summary>
-        <img class="logo" src="https://github.com/robinmoisson.png" alt="StatiCrypt" loading="lazy">
-        <span class="name"><a href="https://github.com/robinmoisson/staticrypt" target="_blank" rel="noopener">StatiCrypt</a></span>
-        <span class="one">靜態 HTML 密碼保護，瀏覽器端 AES 解密、免伺服器（★8.1k，MIT）</span>
-        <span class="badge ok">已安裝 3.5.4</span>
-        <span class="col-tags tags"><span class="tag">網站發佈</span><span class="tag">加密</span><span class="tag">靜態網站</span></span>
-      </summary>
-      <div class="body">
-        <h4>用途</h4>
-        <p>把一個 HTML 頁面用密碼加密後直接丟上靜態主機（GitHub Pages / Netlify）；讀者輸密碼在瀏覽器內解密，不需後端。適合發佈本入口網這類研究報告。</p>
-        <h4>本機狀態</h4>
-        <p>已安裝 <code>staticrypt@3.5.4</code>（npm 全域）。驗證方式：<code>npm ls -g --depth=0</code>，2026-10-12 實測在列。</p>
-        <h4>安裝（僅供參考，需你的允許才執行）</h4>
-        <pre>npm install -g staticrypt
+        <details class="tool" data-tags="網站發佈 加密 靜態網站" data-search="staticrypt 靜態 HTML 密碼保護 瀏覽器 AES 解密 免伺服器 網站發佈 加密">
+          <summary>
+            <img class="logo" src="https://github.com/robinmoisson.png" alt="StatiCrypt" loading="lazy">
+            <span class="name"><a href="https://github.com/robinmoisson/staticrypt" target="_blank" rel="noopener">StatiCrypt</a></span>
+            <span class="one">靜態 HTML 密碼保護，瀏覽器端 AES 解密、免伺服器（★8.1k，MIT）</span>
+            <span class="badge ok">已安裝 3.5.4</span>
+            <span class="col-tags tags"><span class="tag">網站發佈</span><span class="tag">加密</span><span class="tag">靜態網站</span></span>
+          </summary>
+          <div class="body">
+            <h4>用途</h4>
+            <p>把一個 HTML 頁面用密碼加密後直接丟上靜態主機（GitHub Pages / Netlify）；讀者輸密碼在瀏覽器內解密，不需後端。適合發佈本入口網這類研究報告。</p>
+            <h4>本機狀態</h4>
+            <p>已安裝 <code>staticrypt@3.5.4</code>（npm 全域）。2026-10-12 實測在列。</p>
+            <h4>安裝（僅供參考，需你的允許才執行）</h4>
+            <pre>npm install -g staticrypt
 staticrypt 報告.html -d . --remember 30 --short</pre>
-        <h4>來源</h4>
-        <p><a href="https://github.com/robinmoisson/staticrypt" target="_blank" rel="noopener">github.com/robinmoisson/staticrypt</a></p>
-      </div>
-    </details>
+            <h4>來源</h4>
+            <p><a href="https://github.com/robinmoisson/staticrypt" target="_blank" rel="noopener">github.com/robinmoisson/staticrypt</a></p>
+          </div>
+        </details>
 
-    <details class="tool" data-tags="逆向工程 MCP Agent" data-search="rea reverse engineer anything MCP 逆向工程 binary app runtime agent Hopper Ghidra">
-      <summary>
-        <img class="logo" src="https://github.com/morluto.png" alt="REA" loading="lazy">
-        <span class="name"><a href="https://github.com/morluto/rea" target="_blank" rel="noopener">REA</a></span>
-        <span class="one">Reverse Engineer Anything：一個 MCP 搞定 binary / App / runtime 逆向，附證據回傳（MIT）</span>
-        <span class="badge no">未安裝</span>
-        <span class="col-tags tags"><span class="tag">逆向工程</span><span class="tag">MCP</span><span class="tag">Agent</span></span>
-      </summary>
-      <div class="body">
-        <h4>用途</h4>
-        <p>Agent 透過 MCP 呼叫 REA，檢查目標程式（native binary、APK、韌體、網站、WASM、EVM bytecode 等）並回傳帶證據的發現；可接 Hopper / Ghidra / IDA 做 native 分析，靜態 JS 分析不需要引擎。</p>
-        <h4>本機狀態</h4>
-        <p>未安裝。npm 套件名 <code>rea-agents</code>。安裝前會先請你允許（含是否一併裝 Hopper 的選項）。</p>
-        <h4>安裝（僅供參考，需你的允許才執行）</h4>
-        <pre>npm install -g rea-agents
+        <details class="tool" data-tags="逆向工程 MCP Agent" data-search="rea reverse engineer anything MCP 逆向工程 binary app runtime agent Hopper Ghidra">
+          <summary>
+            <img class="logo" src="https://github.com/morluto.png" alt="REA" loading="lazy">
+            <span class="name"><a href="https://github.com/morluto/rea" target="_blank" rel="noopener">REA</a></span>
+            <span class="one">Reverse Engineer Anything：一個 MCP 搞定 binary / App / runtime 逆向，附證據回傳（MIT）</span>
+            <span class="badge no">未安裝</span>
+            <span class="col-tags tags"><span class="tag">逆向工程</span><span class="tag">MCP</span><span class="tag">Agent</span></span>
+          </summary>
+          <div class="body">
+            <h4>用途</h4>
+            <p>Agent 透過 MCP 呼叫 REA，檢查目標程式（native binary、APK、韌體、網站、WASM、EVM bytecode 等）並回傳帶證據的發現；可接 Hopper / Ghidra / IDA 做 native 分析，靜態 JS 分析不需要引擎。</p>
+            <h4>本機狀態</h4>
+            <p>未安裝。npm 套件名 <code>rea-agents</code>。安裝前會先請你允許（含是否一併裝 Hopper 的選項）。</p>
+            <h4>安裝（僅供參考，需你的允許才執行）</h4>
+            <pre>npm install -g rea-agents
 rea setup   # 註冊到你的 agent（Claude Code / Codex / Cursor / Gemini CLI…）</pre>
-        <h4>來源</h4>
-        <p><a href="https://github.com/morluto/rea" target="_blank" rel="noopener">github.com/morluto/rea</a> · <a href="https://rea.tools/" target="_blank" rel="noopener">rea.tools</a></p>
+            <h4>來源</h4>
+            <p><a href="https://github.com/morluto/rea" target="_blank" rel="noopener">github.com/morluto/rea</a> · <a href="https://rea.tools/" target="_blank" rel="noopener">rea.tools</a></p>
+          </div>
+        </details>
       </div>
-    </details>
-  </div>
+    </div>
+  </section>
 
-  <h2 class="section">2 · AI 相關的研究報告</h2>
-  <p class="section-sub">本地 RAG 知識庫等 AI 系統研究。來源：Research_Reports_AI-Gen（已搬入本 repo）。</p>
-  <ul class="list" id="list-ai"></ul>
+  <section class="panel" id="panel-ai">
+    <div class="panel-head">
+      <div class="row"><span class="num">02</span><h2>AI 相關的研究報告</h2><span class="n" id="n-ai"></span></div>
+      <p>本地 RAG 知識庫、AI 產業觀察。來源：Research_Reports_AI-Gen（已搬入本 repo）。</p>
+    </div>
+    <div class="panel-body">
+      <ul class="list" id="list-ai"></ul>
+    </div>
+  </section>
 
-  <h2 class="section">3 · LLM 使用的研究報告</h2>
-  <p class="section-sub">模型選型、用量與成本研究。來源：Research_Reports_AI-Gen（已搬入本 repo）。</p>
-  <ul class="list" id="list-llm"></ul>
+  <section class="panel" id="panel-llm">
+    <div class="panel-head">
+      <div class="row"><span class="num">03</span><h2>LLM 使用的研究報告</h2><span class="n" id="n-llm"></span></div>
+      <p>模型選型、用量與成本研究。來源：Research_Reports_AI-Gen（已搬入本 repo）。</p>
+    </div>
+    <div class="panel-body">
+      <ul class="list" id="list-llm"></ul>
+    </div>
+  </section>
 
   <footer>
     <p id="updated"></p>
@@ -286,6 +344,11 @@ const REPORTS_LLM = [
   const toolEls = Array.from(toolsEl.querySelectorAll("details.tool"));
   const listAi = document.getElementById("list-ai");
   const listLlm = document.getElementById("list-llm");
+  const panels = [
+    { panel: document.getElementById("panel-tools"), badge: document.getElementById("n-tools") },
+    { panel: document.getElementById("panel-ai"), badge: document.getElementById("n-ai") },
+    { panel: document.getElementById("panel-llm"), badge: document.getElementById("n-llm") }
+  ];
   let activeTag = null;
 
   const allTags = [...new Set([
@@ -339,6 +402,14 @@ const REPORTS_LLM = [
     return true;
   }
 
+  function visibleCount(root) {
+    let n = 0;
+    root.querySelectorAll("details.tool, li.item").forEach(el => {
+      if (el.style.display !== "none") n++;
+    });
+    return n;
+  }
+
   function render() {
     let n = 0;
     toolEls.forEach(t => {
@@ -362,6 +433,12 @@ const REPORTS_LLM = [
           ul.appendChild(empty);
         }
       } else if (empty) empty.remove();
+    });
+    // 空的分區整塊隱藏＋各區計數
+    const counts = [visibleCount(toolsEl), visibleCount(listAi), visibleCount(listLlm)];
+    panels.forEach((p, i) => {
+      p.panel.style.display = counts[i] ? "" : "none";
+      p.badge.textContent = counts[i] + " 筆";
     });
     const query = q.value.trim();
     countEl.textContent = (query || activeTag)
