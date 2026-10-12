@@ -1,0 +1,755 @@
+<!doctype html><html><head><meta charset=utf8><meta name="robots" content="noindex, nofollow, noarchive"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>OpenCode Go 選型指南</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+TC:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --plane:#eceef2; --surface:#ffffff; --surface-2:#f5f7f9; --surface-3:#e7eaf0;
+  --ink:#11141a; --ink-2:#48505f; --ink-3:#78808d;
+  --rule:#d8dce4; --rule-2:#c1c8d3;
+  --accent:#2a78d6; --accent-deep:#1c5cab;
+  --s1:#2a78d6; --s2:#eb6834;
+  --good:#0ca30c; --warn:#c98500; --crit:#d03b3b;
+  --shadow:0 1px 2px rgba(17,20,26,.06), 0 8px 24px -16px rgba(17,20,26,.28);
+  --sans:"IBM Plex Sans TC","IBM Plex Sans","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --plane:#0a0c10; --surface:#14171d; --surface-2:#191d25; --surface-3:#222731;
+    --ink:#f2f4f8; --ink-2:#b6bdc9; --ink-3:#848c99;
+    --rule:#252a33; --rule-2:#333a46;
+    --accent:#3987e5; --accent-deep:#7fb2f0;
+    --s1:#3987e5; --s2:#d95926;
+    --good:#0ca30c; --warn:#fab219; --crit:#e66767;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#0a0c10; --surface:#14171d; --surface-2:#191d25; --surface-3:#222731;
+  --ink:#f2f4f8; --ink-2:#b6bdc9; --ink-3:#848c99;
+  --rule:#252a33; --rule-2:#333a46;
+  --accent:#3987e5; --accent-deep:#7fb2f0;
+  --s1:#3987e5; --s2:#d95926;
+  --good:#0ca30c; --warn:#fab219; --crit:#e66767;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 28px -18px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--plane); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px}
+h1,h2,h3{text-wrap:balance; margin:0; line-height:1.25; font-weight:600; letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--accent-deep); text-underline-offset:3px}
+code,.num{font-family:var(--mono); font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+.eyebrow{font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3)}
+
+/* masthead */
+header.top{background:var(--surface); border-bottom:1px solid var(--rule)}
+.top-inner{display:flex; flex-direction:column; gap:22px; padding:34px 0 26px}
+.title-row{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 28px; justify-content:space-between}
+h1{font-size:clamp(28px,4.2vw,40px); font-weight:700; letter-spacing:-.025em}
+h1 .go{color:var(--accent)}
+.sub{color:var(--ink-2); margin-top:8px; font-size:15px}
+.stamp{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); text-align:right; line-height:1.9}
+.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); border-top:1px solid var(--rule)}
+.rule-cell{padding:14px 20px 12px; border-right:1px solid var(--rule)}
+.rule-cell:last-child{border-right:none}
+.rule-cell .k{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3)}
+.rule-cell .v{font-family:var(--mono); font-size:22px; font-weight:600; letter-spacing:-.02em; margin-top:2px}
+.rule-cell .n{font-size:12.5px; color:var(--ink-2); line-height:1.5; margin-top:2px}
+
+main{padding:38px 0 64px; display:flex; flex-direction:column; gap:46px}
+section{display:flex; flex-direction:column; gap:16px}
+.sec-head{display:flex; flex-direction:column; gap:5px; border-bottom:1px solid var(--rule-2); padding-bottom:10px}
+.sec-head h2{font-size:21px}
+.sec-head .lede{color:var(--ink-2); font-size:14px; max-width:80ch}
+.sub-head{display:flex; flex-direction:column; gap:3px; margin-top:6px}
+.sub-head h3{font-size:16px}
+.sub-head p{color:var(--ink-2); font-size:13.5px}
+
+/* picks */
+.picks{display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:14px}
+.pick{background:var(--surface); border:1px solid var(--rule); padding:16px 18px 18px; display:flex; flex-direction:column; gap:9px}
+.pick .rank{display:flex; align-items:baseline; gap:8px; justify-content:space-between}
+.pick .role{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
+.pick .n{font-family:var(--mono); font-size:22px; font-weight:600; color:var(--accent); letter-spacing:-.03em; line-height:1}
+.pick .model{font-size:17px; font-weight:600; letter-spacing:-.01em}
+.pick .id{font-family:var(--mono); font-size:12px; color:var(--accent-deep); word-break:break-all}
+.pick p{font-size:13.5px; color:var(--ink-2)}
+.pick p b{color:var(--ink); font-weight:600}
+.pick .stats{display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:4px}
+.pick.top{border-top:3px solid var(--accent)}
+.pick.warn-pick{border-left:3px solid var(--crit)}
+.chip{font-family:var(--mono); font-size:11px; padding:2px 7px; border:1px solid var(--rule-2); color:var(--ink-2); white-space:nowrap}
+.chip.hi{border-color:var(--accent); color:var(--accent-deep)}
+
+/* 建議設定 */
+.pairing{background:var(--surface); border:1px solid var(--rule); padding:14px 20px 16px; display:flex; flex-direction:column; gap:8px}
+.pairing h3{font-size:14.5px}
+table.mini{border-collapse:collapse; width:100%; font-size:13.5px; table-layout:auto}
+table.mini th{text-align:left; padding:0 18px 7px 0; border-bottom:1px solid var(--rule-2); font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); font-weight:500; white-space:nowrap; position:static; background:none; cursor:default}
+table.mini td{padding:9px 18px 9px 0; border-bottom:1px solid var(--rule); vertical-align:baseline}
+table.mini tr:last-child td{border-bottom:none}
+table.mini tr:hover td{background:none}
+table.mini td:nth-child(1){color:var(--ink); font-weight:500; white-space:nowrap; width:1%}
+table.mini td:nth-child(2){font-family:var(--mono); font-size:12px; color:var(--accent-deep); white-space:nowrap; width:1%}
+table.mini td:nth-child(3){color:var(--ink-2); font-size:13px; line-height:1.6; padding-right:0; white-space:normal; min-width:300px}
+table.mini td:nth-child(3) b{color:var(--ink); font-weight:600}
+.subtle{font-weight:400; color:var(--ink-3); font-size:12px}
+
+/* charts */
+.chart-card{background:var(--surface); border:1px solid var(--rule); padding:18px 20px 14px; display:flex; flex-direction:column; gap:12px; position:relative}
+.chart-head{display:flex; flex-wrap:wrap; gap:8px 22px; align-items:baseline; justify-content:space-between}
+.chart-head h3{font-size:16px}
+.legend{display:flex; flex-wrap:wrap; gap:14px; align-items:center; font-size:12.5px; color:var(--ink-2)}
+.legend .item{display:flex; align-items:center; gap:7px}
+.swatch{width:11px; height:11px; border-radius:50%; display:inline-block; flex:none}
+.hint{font-size:12.5px; color:var(--ink-3)}
+.scroller{overflow-x:auto; overflow-y:hidden}
+svg{display:block; max-width:100%; height:auto}
+.chart svg{font-family:var(--sans)}
+.chart circle[data-idx]{cursor:pointer}
+#ladder g[data-idx]:hover rect:first-of-type{fill:var(--surface-2)}
+.tip{position:absolute; pointer-events:none; opacity:0; transform:translate(-50%,-100%); background:var(--surface); border:1px solid var(--rule-2); box-shadow:var(--shadow); padding:9px 11px; font-size:12.5px; line-height:1.6; min-width:190px; z-index:5; transition:opacity .09s linear}
+.tip.on{opacity:1}
+.tip .tname{font-weight:600; font-size:13.5px; margin-bottom:3px}
+.tip .trow{display:flex; justify-content:space-between; gap:16px; color:var(--ink-2)}
+.tip .trow b{font-family:var(--mono); font-weight:500; color:var(--ink); font-variant-numeric:tabular-nums}
+
+/* tables */
+.table-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.seg{display:inline-flex; border:1px solid var(--rule-2); background:var(--surface)}
+.seg button{font:inherit; font-size:13px; padding:6px 13px; background:none; border:none; cursor:pointer; color:var(--ink-2); border-right:1px solid var(--rule); font-family:var(--sans)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+.tbl-wrap{background:var(--surface); border:1px solid var(--rule); overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:13px}
+thead th{position:sticky; top:0; z-index:2; background:var(--surface-2); text-align:left; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); font-weight:500; padding:10px 9px; white-space:nowrap; border-bottom:1px solid var(--rule-2)}
+#tbl thead th{cursor:pointer; user-select:none}
+thead th .ar{color:var(--accent); font-size:10px}
+tbody td{padding:8px 9px; border-bottom:1px solid var(--rule); vertical-align:top; white-space:nowrap}
+tbody tr:hover td{background:var(--surface-2)}
+td.name{white-space:normal; min-width:165px}
+td.name .mid{font-family:var(--mono); font-size:11px; color:var(--ink-3); display:block}
+td.n{font-family:var(--mono); font-variant-numeric:tabular-nums; text-align:right}
+td.why{white-space:normal; color:var(--ink-2); min-width:260px}
+tr.pickrow td{background:var(--surface-2)}
+.grp th{background:var(--surface-3); font-family:var(--sans); font-size:12.5px; letter-spacing:0; text-transform:none; color:var(--ink); font-weight:600; padding:8px 9px; position:static; cursor:default; border-bottom:1px solid var(--rule-2)}
+.dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:1px}
+.badge{font-family:var(--mono); font-size:10.5px; padding:1px 6px; border:1px solid currentColor; white-space:nowrap}
+.b-tight{color:var(--crit)} .b-mid{color:var(--warn)} .b-wide{color:var(--good)} .b-max{color:var(--accent)}
+.reason{font-family:var(--mono); font-size:10.5px; padding:1px 6px; border:1px solid currentColor; margin-right:7px; white-space:nowrap}
+.r-dom{color:var(--ink-3)} .r-weak{color:var(--warn)} .r-none{color:var(--ink-3)} .r-cost{color:var(--crit)}
+.est{color:var(--ink-3); font-size:10px}
+
+/* notes */
+.notes{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:12px}
+.note{background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent); padding:13px 16px; display:flex; flex-direction:column; gap:5px}
+.note.risk{border-left-color:var(--crit)}
+.note h3{font-size:14px}
+.note p{font-size:13.5px; color:var(--ink-2)}
+footer{border-top:1px solid var(--rule-2); padding:22px 0 56px; color:var(--ink-3); font-size:12.5px; line-height:1.8}
+footer ul{margin:8px 0 0; padding-left:18px}
+footer a{color:var(--ink-2)}
+@media (prefers-reduced-motion: reduce){*{transition:none !important; animation:none !important}}
+</style>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="title-row">
+      <div>
+        <div class="eyebrow" id="eyebrow">$10 / 月訂閱</div>
+        <h1>OpenCode <span class="go">Go</span> 選型指南</h1>
+        <p class="sub">用實測數字選模型：每成功任務成本 × 困難任務解題率 × 額度。</p>
+      </div>
+      <div class="stamp" id="stamp">—</div>
+    </div>
+    <div class="rules">
+      <div class="rule-cell"><div class="k">訂閱</div><div class="v">$10 / 月</div><div class="n">每個 workspace 限一人</div></div>
+      <div class="rule-cell"><div class="k">5 小時上限</div><div class="v">$12</div><div class="n">最常卡住的一條線</div></div>
+      <div class="rule-cell"><div class="k">每週上限</div><div class="v">$30</div><div class="n">以美元計，不是次數</div></div>
+      <div class="rule-cell"><div class="k">每月上限</div><div class="v">$60</div><div class="n">另有各模型月額度 $15–$60</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <div class="sec-head">
+      <h2>結論：4 個選項</h2>
+      <p class="lede">取「困難任務解題率 ↑、一般任務每成功成本 ↓」的 Pareto 前緣（沒有別的模型能同時更強又更便宜），再依速度與資料條款分工。</p>
+    </div>
+    <div class="picks" id="picks"></div>
+
+    <div class="pairing">
+      <h3>最終建議設定</h3>
+      <div class="scroller"><table class="mini">
+        <thead><tr><th scope="col">用途</th><th scope="col">選這個</th><th scope="col">為什麼是它</th></tr></thead>
+        <tbody id="pairbody"></tbody>
+      </table></div>
+    </div>
+
+    <div class="sub-head">
+      <h3>其餘 <span id="out-n">—</span> 個為什麼不選</h3>
+      <p>全部由同一份數字算出。</p>
+    </div>
+    <div class="tbl-wrap"><table id="extbl">
+      <thead><tr>
+        <th scope="col">模型</th><th scope="col">智能</th><th scope="col">TB 4.0</th>
+        <th scope="col">每成功（一般）</th><th scope="col">次/天</th><th scope="col">原因</th>
+      </tr></thead>
+      <tbody id="exbody"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>每成功任務成本</h2>
+      <p class="lede">AA 實測每任務 token × Go 單價（快取命中 <span id="cache-pct">—</span>，取 OpenCode 實測中位數）÷ 答對率。一般任務以智能指數作成功率，困難任務以 Terminal-Bench 4.0 作成功率。</p>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>困難任務解題率 vs 一般任務每成功成本</h3>
+        <div class="legend">
+          <span class="item"><span class="swatch" style="background:var(--s1)"></span>可讀圖片</span>
+          <span class="item"><span class="swatch" style="background:var(--s2)"></span>純文字</span>
+          <span class="item"><svg width="26" height="10" aria-hidden="true"><line x1="1" y1="5" x2="25" y2="5" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>Pareto 前緣</span>
+          <span class="item">左上最好</span>
+        </div>
+      </div>
+      <div class="scroller chart"><div id="solve"></div></div>
+      <p class="hint">橫軸對數刻度；圓圈大小＝每天可用次數；粗框＝建議選項。</p>
+      <div class="tip" id="tip3"></div>
+    </div>
+    <div class="tbl-wrap"><table id="solvetbl">
+      <thead><tr>
+        <th scope="col">模型</th><th scope="col">智能</th><th scope="col">TB 4.0</th><th scope="col">單價 $/M</th>
+        <th scope="col">每任務 token 入/出</th><th scope="col">每任務成本</th>
+        <th scope="col">每成功（一般）</th><th scope="col">倍</th>
+        <th scope="col">每解一題（困難）</th><th scope="col">倍</th>
+        <th scope="col">重度任務/月</th><th scope="col">次/天</th>
+      </tr></thead>
+      <tbody id="solvebody"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>能力 vs 速度</h2>
+      <p class="lede">越右越聰明（AA 智能指數），越上越快（中位輸出速度），圓越大額度越多。</p>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>智能指數 × 輸出速度</h3>
+        <div class="legend">
+          <span class="item"><span class="swatch" style="background:var(--s1)"></span>可讀圖片</span>
+          <span class="item"><span class="swatch" style="background:var(--s2)"></span>純文字</span>
+          <span class="item"><svg width="42" height="14" aria-hidden="true"><circle cx="5" cy="7" r="3.5" fill="none" stroke="var(--ink-3)" stroke-width="1.2"/><circle cx="26" cy="7" r="6.5" fill="none" stroke="var(--ink-3)" stroke-width="1.2"/></svg>每天可用次數</span>
+        </div>
+      </div>
+      <div class="scroller chart"><div id="scatter"></div></div>
+      <p class="hint" id="scatter-note">—</p>
+      <div class="tip" id="tip1"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>天梯圖</h2>
+      <p class="lede">依 AA 智能指數排序；分層為本頁自訂：與榜首差距 ≤10% / ≤25% / ≤40% / 其餘。</p>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h3>智能指數天梯</h3>
+        <div class="legend">
+          <span class="item"><span class="swatch" style="background:var(--s1)"></span>可讀圖片</span>
+          <span class="item"><span class="swatch" style="background:var(--s2)"></span>純文字</span>
+          <span class="item"><span class="est">†</span>&nbsp;AA 推估值</span>
+        </div>
+      </div>
+      <div class="scroller chart"><div id="ladder"></div></div>
+      <div class="tip" id="tip2"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>全部 <span id="all-n">—</span> 個模型</h2>
+      <p class="lede">點欄位標題排序。額度倍率＝各模型月額度 ÷ $10。</p>
+    </div>
+    <div class="table-tools">
+      <span class="seg" role="group" aria-label="分組方式">
+        <button type="button" data-view="group" aria-pressed="true">依模態分組</button>
+        <button type="button" data-view="flat" aria-pressed="false">單一列表</button>
+      </span>
+      <span class="eyebrow" style="margin-left:6px">排序：<span id="sort-label">—</span></span>
+    </div>
+    <div class="tbl-wrap"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>免費模型（<span id="free-n">—</span>）</h2>
+      <p class="lede">Go 額度用完後仍可使用。Zen 價格表三項單價皆為 Free 者，全部標註限時。</p>
+    </div>
+    <div class="tbl-wrap"><table id="ftbl">
+      <thead><tr>
+        <th scope="col">免費模型</th><th scope="col">model id</th><th scope="col">供應商</th><th scope="col">圖片</th>
+        <th scope="col">智能</th><th scope="col">TB 4.0</th><th scope="col">速度</th><th scope="col">上下文</th><th scope="col">條件與代價</th>
+      </tr></thead>
+      <tbody id="ftbody"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>額度規則與風險</h2>
+      <p class="lede">OpenCode 未公開佇列或可用率數據，以下只列官方文件寫明的規則。</p>
+    </div>
+    <div class="notes">
+      <div class="note"><h3>用完不斷線</h3><p>達上限後可改用免費模型；有 Zen 餘額可開 <code>Use balance</code> 續用。</p></div>
+      <div class="note"><h3>5 小時窗最容易卡</h3><p id="n-5h">—</p></div>
+      <div class="note risk"><h3>DeepSeek 尖峰價 ×2</h3><p id="n-ds">—</p></div>
+      <div class="note risk"><h3>Muse Spark 的代價</h3><p>prompt 與回覆用於訓練 Meta 模型、非 ZDR、僅限 Meta 允許地區。公司程式碼不要用。</p></div>
+      <div class="note"><h3>工具要帶 session header</h3><p>Hermes 需含 PR #101864 的版本（v0.21.0 本身不含）；Claude Code、Codex 原生支援。缺 header 會影響快取與額度。</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="eyebrow">資料來源與方法</div>
+  <ul>
+    <li>模型清單、單價、月額度、請求數估計、資料條款：<a href="https://opencode.ai/docs/go/">opencode.ai/docs/go</a>（<span id="upd">—</span> 更新）與 <code>/zen/go/v1/models</code> 即時端點；免費模型：<a href="https://opencode.ai/docs/zen">opencode.ai/docs/zen</a>。</li>
+    <li>輸入模態、上下文：<a href="https://models.dev/providers/opencode/">models.dev</a>（OpenCode 自用的模型資料庫）。</li>
+    <li>智能指數、Terminal-Bench 4.0、HLE、速度、首字延遲、每任務 token 用量：<a href="https://artificialanalysis.ai/leaderboards/models">Artificial Analysis</a>。</li>
+    <li>使用量排名、留存率、快取命中率：<a href="https://opencode.ai/data/">opencode.ai/data</a>。</li>
+    <li><b>每任務成本</b>＝AA 跑完整套評測的輸入／輸出 token ÷ 任務數，以 Go 單價計（輸入按快取命中率分攤快取價）。<b>每成功（一般）</b>＝每任務成本 ÷（智能指數/100）。<b>每解一題（困難）</b>＝AA 的 Terminal-Bench 4.0 每題成本換算成 Go 價 ÷ TB 4.0 答對率；答對率 &lt;5% 視為解不出。<b>重度任務/月</b>＝模型月額度 ÷ 每任務成本。</li>
+  </ul>
+  <p style="margin-top:10px">所有數值取自上述來源，未經捏造。<span class="est">†</span> 為 AA 推估值；Qwen3.8 Flash 以 AA 的 Qwen3.8-Flash-Next 近似（同價位）；無評測者欄位留空。速度為 AA 自測環境中位數，非 Go 端點實測。</p>
+</footer>
+
+<script id="data" type="application/json">{"meta":{"updated":"Sep 24, 2026","cache":0.942,"n_models":32,"n_image":21},"models":[{"name":"Grok 4.7","id":"grok-4.7","vendor":"SpaceXAI (xAI)","image":true,"attachment":true,"context":500000,"free":false,"price_tiers":[{"tier":"≤ 200K tokens","input":"$2.00","output":"$6.00","cache_read":"$0.50","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null},{"tier":"> 200K tokens","input":"$4.00","output":"$12.00","cache_read":"$1.00","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":3.0,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":169.0,"req_month":845.0,"per_day":28,"training":"Not used","retention_days":"30 days","aa_proxy_note":null,"aa_deprecated":false,"ii":46.4465506302286,"ii_est":false,"tb4":0.257575757575758,"hle":0.431417979610751,"tps":40.3898882186484,"ttft":0.918507130499904,"go_cost_task":2.9360426055213167,"tok_in_task":3152431.7836616836,"tok_out_task":180927.5247519847,"per_solve":6.321336171755379,"tb4_per_solve":44.52922074362564,"tb4_x":56.181379039158934,"heavy_month":5.108917687976342,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"Grok 4.6","id":"grok-4.6","vendor":"SpaceXAI (xAI)","image":true,"attachment":true,"context":500000,"free":false,"price_tiers":[{"tier":"≤ 200K tokens","input":"$2.00","output":"$6.00","cache_read":"$0.50","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null},{"tier":"> 200K tokens","input":"$4.00","output":"$12.00","cache_read":"$1.00","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":3.0,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":169.0,"req_month":845.0,"per_day":28,"training":"Not used","retention_days":"30 days","aa_proxy_note":null,"aa_deprecated":false,"ii":44.3113073012592,"ii_est":false,"tb4":0.212121212121212,"hle":0.429101019462465,"tps":60.8720210432502,"ttft":41.558889605,"go_cost_task":1.4204237245698728,"tok_in_task":1658841.514529691,"tok_out_task":74447.29259015732,"per_solve":3.2055558977595506,"tb4_per_solve":27.05054060360388,"tb4_x":34.128975299501036,"heavy_month":10.560229134825414,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"GLM-5.3-Flash","id":"glm-5.3-flash","vendor":"Zhipu / Z AI","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$0.15","output":"$0.50","cache_read":"$0.03","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.2375,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":6320.0,"req_month":31580.0,"per_day":1053,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":41.807466113455,"ii_est":false,"tb4":0.328282828282828,"hle":0.398517145505097,"tps":42.7743809774968,"ttft":50.43009261932278,"go_cost_task":0.2980855538907623,"tok_in_task":5856459.743958332,"tok_out_task":163261.6035081247,"per_solve":0.7129959827793263,"tb4_per_solve":2.8323925779522403,"tb4_x":3.5735572810897316,"heavy_month":201.28449439045227,"heavy_month_promo":null,"oc_usage_rank":9,"oc_retention":69.3,"oc_retention_rank":8},{"name":"GLM-5.3","id":"glm-5.3","vendor":"Zhipu / Z AI","image":false,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$1.40","output":"$4.40","cache_read":"$0.26","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":2.15,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":220.0,"req_month":1080.0,"per_day":36,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":44.777392385614,"ii_est":false,"tb4":0.419191919191919,"hle":0.422613531047266,"tps":60.0268949031801,"ttft":36.77222558100854,"go_cost_task":2.1478791261718846,"tok_in_task":4330938.190151423,"tok_out_task":167153.08263629596,"per_solve":4.796793675868341,"tb4_per_solve":20.601834429205663,"tb4_x":25.99280763598104,"heavy_month":6.983633211583071,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"GLM-5.2","id":"glm-5.2","vendor":"Zhipu / Z AI","image":false,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$1.40","output":"$4.40","cache_read":"$0.26","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":2.15,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":880.0,"req_month":4300.0,"per_day":143,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":true,"ii":33.7054572377545,"ii_est":false,"tb4":0.0101010101010101,"hle":0.411492122335496,"tps":70.1123039915294,"ttft":32.450914344190075,"go_cost_task":0.8969534315924143,"tok_in_task":1267725.0109092582,"tok_out_task":109891.57978061064,"per_solve":2.6611519471918323,"tb4_per_solve":null,"tb4_x":null,"heavy_month":66.89310491123098,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"GLM-5.1","id":"glm-5.1","vendor":"Zhipu / Z AI","image":false,"attachment":false,"context":202752,"free":false,"price_tiers":[{"tier":null,"input":"$1.40","output":"$4.40","cache_read":"$0.26","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":2.15,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":880.0,"req_month":4300.0,"per_day":143,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":true,"ii":26.0585912980095,"ii_est":false,"tb4":0.0202020202020202,"hle":0.300741427247451,"tps":41.6409496600957,"ttft":92.87259727740874,"go_cost_task":0.8340826610472868,"tok_in_task":1236497.9227283308,"tok_out_task":97917.26329252805,"per_solve":3.200797201616185,"tb4_per_solve":null,"tb4_x":null,"heavy_month":71.93531624870741,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"GPT 6 Luna","id":"gpt-6-luna","vendor":"OpenAI","image":true,"attachment":true,"context":1050000,"free":false,"price_tiers":[{"tier":"≤ 272K tokens","input":"$0.10","output":"$0.50","cache_read":"$0.01","cache_write":"$0.125","limit":"$15","limit_promo":null,"promo_note":null},{"tier":"> 272K tokens","input":"$0.20","output":"$0.75","cache_read":"$0.02","cache_write":"$0.25","limit":"$15","limit_promo":null,"promo_note":null}],"blend":0.2,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":4230.0,"req_month":21130.0,"per_day":704,"training":"Not used","retention_days":"30 days","aa_proxy_note":null,"aa_deprecated":false,"ii":37.2559686869738,"ii_est":false,"tb4":0.126262626262626,"hle":0.385078776645042,"tps":141.378259633231,"ttft":108.470850121,"go_cost_task":0.06687526044990373,"tok_in_task":1743201.4017730907,"tok_out_task":80687.47022983455,"per_solve":0.17950213833330292,"tb4_per_solve":1.837280158059363,"tb4_x":2.3180493895311427,"heavy_month":224.2981918737573,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"GPT 5.6 Luna","id":"gpt-5.6-luna","vendor":"OpenAI","image":true,"attachment":true,"context":1050000,"free":false,"price_tiers":[{"tier":"≤ 272K tokens","input":"$0.20","output":"$1.20","cache_read":"$0.02","cache_write":"$0.25","limit":"$15","limit_promo":null,"promo_note":null},{"tier":"> 272K tokens","input":"$0.40","output":"$1.80","cache_read":"$0.04","cache_write":"$0.50","limit":"$15","limit_promo":null,"promo_note":null}],"blend":0.45,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":2050.0,"req_month":10250.0,"per_day":342,"training":"Not used","retention_days":"30 days","aa_proxy_note":null,"aa_deprecated":true,"ii":37.3244239690841,"ii_est":false,"tb4":0.116161616161616,"hle":0.394810009267841,"tps":127.15278535364,"ttft":126.6833950415,"go_cost_task":0.18556170555408774,"tok_in_task":2720157.6747711482,"tok_out_task":85633.42161171163,"per_solve":0.49715892657255445,"tb4_per_solve":7.609512946772531,"tb4_x":9.600727882201111,"heavy_month":80.83564416057699,"heavy_month_promo":null,"oc_usage_rank":13,"oc_retention":null,"oc_retention_rank":null},{"name":"Kimi K3","id":"kimi-k3","vendor":"Kimi (Moonshot)","image":true,"attachment":true,"context":1048576,"free":false,"price_tiers":[{"tier":null,"input":"$3.00","output":"$15.00","cache_read":"$0.30","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":6.0,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":110.0,"req_month":490.0,"per_day":16,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":43.5938229518782,"ii_est":false,"tb4":0.126262626262626,"hle":0.468952734012975,"tps":35.3388757800456,"ttft":60.3870708483394,"go_cost_task":1.95853290336281,"tok_in_task":1401401.8089030453,"tok_out_task":87910.18916117864,"per_solve":4.49268444642896,"tb4_per_solve":39.462279540088815,"tb4_x":49.78854890265166,"heavy_month":7.658793974941616,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"Kimi K2.7 Code","id":"kimi-k2.7-code","vendor":"Kimi (Moonshot)","image":true,"attachment":true,"context":262144,"free":false,"price_tiers":[{"tier":null,"input":"$0.95","output":"$4.00","cache_read":"$0.19","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":1.7125,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":1350.0,"req_month":6750.0,"per_day":225,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":25.8121062401836,"ii_est":false,"tb4":0.0101010101010101,"hle":0.35032437442076,"tps":65.8122556855617,"ttft":36.73568539642846,"go_cost_task":0.5380750712510727,"tok_in_task":1161120.6223207887,"tok_out_task":66569.98899455559,"per_solve":2.0845841336783737,"tb4_per_solve":null,"tb4_x":null,"heavy_month":111.50860392118638,"heavy_month_promo":null,"oc_usage_rank":18,"oc_retention":null,"oc_retention_rank":null},{"name":"Kimi K2.6","id":"kimi-k2.6","vendor":"Kimi (Moonshot)","image":true,"attachment":true,"context":262144,"free":false,"price_tiers":[{"tier":null,"input":"$0.95","output":"$4.00","cache_read":"$0.16","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":1.7125,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":1150.0,"req_month":5750.0,"per_day":192,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":true,"ii":26.9791999742844,"ii_est":false,"tb4":0.00505050505050505,"hle":0.374884151992586,"tps":40.8433021234882,"ttft":111.86237220900861,"go_cost_task":0.630058060681385,"tok_in_task":1224531.930646455,"tok_out_task":94506.22467893291,"per_solve":2.335347457604131,"tb4_per_solve":null,"tb4_x":null,"heavy_month":95.22931892199294,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"LongCat-2.0","id":"longcat-2.0","vendor":"LongCat","image":false,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$0.30","output":"$1.20","cache_read":"$0.006","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.5249999999999999,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":11400.0,"req_month":57200.0,"per_day":1907,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":19.1123256610623,"ii_est":false,"tb4":0,"hle":0.336886005560704,"tps":null,"ttft":null,"go_cost_task":0.05825970162661375,"tok_in_task":544148.1255257396,"tok_out_task":38096.665864161994,"per_solve":0.30482790352043193,"tb4_per_solve":null,"tb4_x":null,"heavy_month":1029.8713917990829,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":77.7,"oc_retention_rank":4},{"name":"MiMo-V2.6-Flash","id":"mimo-v2.6-flash","vendor":"Xiaomi","image":true,"attachment":true,"context":1048576,"free":false,"price_tiers":[{"tier":null,"input":"$0.14","output":"$0.28","cache_read":"$0.0028","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.17500000000000002,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":30100.0,"req_month":150400.0,"per_day":5013,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":null,"ii":null,"ii_est":null,"tb4":null,"hle":null,"tps":null,"ttft":null,"go_cost_task":null,"tok_in_task":null,"tok_out_task":null,"per_solve":null,"tb4_per_solve":null,"tb4_x":null,"heavy_month":null,"heavy_month_promo":null,"oc_usage_rank":8,"oc_retention":null,"oc_retention_rank":null},{"name":"MiMo-V2.6-Pro","id":"mimo-v2.6-pro","vendor":"Xiaomi","image":true,"attachment":true,"context":1048576,"free":false,"price_tiers":[{"tier":null,"input":"$0.435","output":"$0.87","cache_read":"$0.003625","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":0.54375,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":3250.0,"req_month":16300.0,"per_day":543,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":46.3242065310383,"ii_est":false,"tb4":0.348484848484849,"hle":0.493512511584801,"tps":47.1696681632875,"ttft":45.574366709774665,"go_cost_task":0.1623511722999254,"tok_in_task":2854310.8574532135,"tok_out_task":92632.35789183037,"per_solve":0.3504672491068926,"tb4_per_solve":1.531847769540986,"tb4_x":1.9326931559473113,"heavy_month":92.39231098552956,"heavy_month_promo":null,"oc_usage_rank":15,"oc_retention":null,"oc_retention_rank":null},{"name":"MiMo-V2.5","id":"mimo-v2.5","vendor":"Xiaomi","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$0.14","output":"$0.28","cache_read":"$0.0028","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.17500000000000002,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":30100.0,"req_month":150400.0,"per_day":5013,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":25.1743063555572,"ii_est":true,"tb4":0,"hle":0.272011121408712,"tps":42.8677067277262,"ttft":49.91633042151491,"go_cost_task":null,"tok_in_task":null,"tok_out_task":null,"per_solve":null,"tb4_per_solve":null,"tb4_x":null,"heavy_month":null,"heavy_month_promo":null,"oc_usage_rank":5,"oc_retention":72.7,"oc_retention_rank":5},{"name":"MiMo-V2.5-Pro","id":"mimo-v2.5-pro","vendor":"Xiaomi","image":false,"attachment":true,"context":1048576,"free":false,"price_tiers":[{"tier":null,"input":"$0.435","output":"$0.87","cache_read":"$0.003625","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":0.54375,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":3250.0,"req_month":16300.0,"per_day":543,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":25.9868888896511,"ii_est":false,"tb4":0,"hle":0.356811862835959,"tps":53.3299036814646,"ttft":45.43129457755234,"go_cost_task":0.05427668393349275,"tok_in_task":563027.1393257622,"tok_out_task":43849.324464702426,"per_solve":0.2088618001330188,"tb4_per_solve":null,"tb4_x":null,"heavy_month":276.3617618640826,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":64.9,"oc_retention_rank":15},{"name":"MiniMax M3","id":"minimax-m3","vendor":"MiniMax","image":true,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$0.30","output":"$1.20","cache_read":"$0.06","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.5249999999999999,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":3200.0,"req_month":16000.0,"per_day":533,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":29.2202932236316,"ii_est":false,"tb4":0.0202020202020202,"hle":0.389712696941613,"tps":144.623847948241,"ttft":15.110383447626797,"go_cost_task":0.500321572336268,"tok_in_task":4975372.969485205,"tok_out_task":110451.66869326799,"per_solve":1.7122400809162253,"tb4_per_solve":null,"tb4_x":null,"heavy_month":119.92287224360132,"heavy_month_promo":null,"oc_usage_rank":17,"oc_retention":null,"oc_retention_rank":null},{"name":"MiniMax M2.7","id":"minimax-m2.7","vendor":"MiniMax","image":false,"attachment":false,"context":204800,"free":false,"price_tiers":[{"tier":null,"input":"$0.30","output":"$1.20","cache_read":"$0.06","cache_write":"$0.375","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.5249999999999999,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":3400.0,"req_month":17000.0,"per_day":567,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":true,"ii":22.7578150287271,"ii_est":false,"tb4":0,"hle":0.29610750695088,"tps":59.482988965523,"ttft":43.001017737816404,"go_cost_task":0.0856136585613249,"tok_in_task":512660.98159881635,"tok_out_task":39764.79900128367,"per_solve":0.3761945443938933,"tb4_per_solve":null,"tb4_x":null,"heavy_month":700.8227543157979,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":65.8,"oc_retention_rank":14},{"name":"Muse Spark 1.3 Contributor","id":"muse-spark-1.3-contributor","vendor":"Meta","image":true,"attachment":true,"context":1048576,"free":false,"price_tiers":[{"tier":null,"input":"$0.10","output":"$0.20","cache_read":"$0.002","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.125,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":45300.0,"req_month":226600.0,"per_day":7553,"training":"Yes","retention_days":"Not ZDR","aa_proxy_note":null,"aa_deprecated":false,"ii":48.0923107719685,"ii_est":false,"tb4":0.333333333333333,"hle":0.487025023169602,"tps":206.590355880577,"ttft":32.76668300963151,"go_cost_task":0.06110736524258069,"tok_in_task":4445128.605941709,"tok_out_task":134754.98517262284,"per_solve":0.12706265151683718,"tb4_per_solve":0.7925975030372318,"tb4_x":1.0,"heavy_month":981.8783670645146,"heavy_month_promo":null,"oc_usage_rank":2,"oc_retention":83.3,"oc_retention_rank":2},{"name":"Muse Spark 1.2 Contributor","id":"muse-spark-1.2-contributor","vendor":"Meta","image":true,"attachment":true,"context":1048576,"free":false,"price_tiers":[{"tier":null,"input":"$0.10","output":"$0.20","cache_read":"$0.002","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.125,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":45300.0,"req_month":226600.0,"per_day":7553,"training":"Yes","retention_days":"Not ZDR","aa_proxy_note":null,"aa_deprecated":true,"ii":39.5758607970943,"ii_est":false,"tb4":0.0707070707070707,"hle":0.454587581093605,"tps":172.40372490824,"ttft":26.385099404732365,"go_cost_task":0.03715813830825847,"tok_in_task":2536878.982333328,"tok_out_task":88323.8010400458,"per_solve":0.09389091622989199,"tb4_per_solve":2.6874333121787686,"tb4_x":3.390665882595555,"heavy_month":1614.7202936338952,"heavy_month_promo":null,"oc_usage_rank":7,"oc_retention":81.1,"oc_retention_rank":3},{"name":"Qwen3.8 Max","id":"qwen3.8-max","vendor":"Alibaba (Qwen)","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$2.00","output":"$6.00","cache_read":"$0.25","cache_write":"$2.50","limit":"$15","limit_promo":null,"promo_note":null}],"blend":3.0,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":160.0,"req_month":810.0,"per_day":27,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":45.4152084980521,"ii_est":false,"tb4":0.388888888888889,"hle":0.430954587581094,"tps":39.1124201305798,"ttft":54.16151606951911,"go_cost_task":5.074999829865694,"tok_in_task":10846809.78442588,"tok_out_task":210391.03177333268,"per_solve":11.174670331158703,"tb4_per_solve":45.06283144214963,"tb4_x":56.854622011132975,"heavy_month":2.9556651237162628,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"Qwen3.8 Flash","id":"qwen3.8-flash","vendor":"Alibaba (Qwen)","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$0.15","output":"$0.47","cache_read":"$0.016","cache_write":"$0.20","limit":"$30","limit_promo":null,"promo_note":null}],"blend":0.22999999999999998,"allow":30.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":5400.0,"req_month":27000.0,"per_day":900,"training":"Not used","retention_days":"0 days","aa_proxy_note":"AA 無同名條目；數值取自同價位（$0.15/$0.47）的 Qwen3.8-Flash-Next","aa_deprecated":false,"ii":39.8223021864741,"ii_est":false,"tb4":0.252525252525253,"hle":0.380444856348471,"tps":54.0852887597738,"ttft":39.84002214915344,"go_cost_task":0.43151070444392936,"tok_in_task":13182962.500578959,"tok_out_task":251330.467830141,"per_solve":1.0835905529100596,"tb4_per_solve":4.031016984311429,"tb4_x":5.085831041436014,"heavy_month":69.52318839612519,"heavy_month_promo":null,"oc_usage_rank":14,"oc_retention":70.9,"oc_retention_rank":7},{"name":"Qwen3.7 Max","id":"qwen3.7-max","vendor":"Alibaba (Qwen)","image":false,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":null,"input":"$2.50","output":"$7.50","cache_read":"$0.50","cache_write":"$3.125","limit":"$30","limit_promo":null,"promo_note":null}],"blend":3.75,"allow":30.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":170.0,"req_month":840.0,"per_day":28,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":true,"ii":29.4571634255623,"ii_est":false,"tb4":0.0151515151515152,"hle":0.405004633920297,"tps":203.370794949994,"ttft":14.156673438332719,"go_cost_task":0.8034855635084596,"tok_in_task":556616.644303445,"tok_out_task":61414.62808233833,"per_solve":2.727640648560248,"tb4_per_solve":null,"tb4_x":null,"heavy_month":37.33732298686676,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"Qwen3.7 Plus","id":"qwen3.7-plus","vendor":"Alibaba (Qwen)","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":"≤ 256K tokens","input":"$0.40","output":"$1.60","cache_read":"$0.04","cache_write":"$0.50","limit":"$60","limit_promo":null,"promo_note":null},{"tier":"> 256K tokens","input":"$1.20","output":"$4.80","cache_read":"$0.12","cache_write":"$1.50","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.7000000000000001,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":4300.0,"req_month":21600.0,"per_day":720,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":25.1622215821984,"ii_est":false,"tb4":0.0101010101010101,"hle":0.356348470806302,"tps":65.6765990782249,"ttft":32.671609922848184,"go_cost_task":0.16299062030918687,"tok_in_task":696928.3419565286,"tok_out_task":75351.01428179585,"per_solve":0.6477592599554024,"tb4_per_solve":null,"tb4_x":null,"heavy_month":368.11934261114124,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"Qwen3.6 Plus","id":"qwen3.6-plus","vendor":"Alibaba (Qwen)","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":"≤ 256K tokens","input":"$0.50","output":"$3.00","cache_read":"$0.05","cache_write":"$0.625","limit":"$60","limit_promo":null,"promo_note":null},{"tier":"> 256K tokens","input":"$2.00","output":"$6.00","cache_read":"$0.20","cache_write":"$2.50","limit":"$60","limit_promo":null,"promo_note":null}],"blend":1.125,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":3300.0,"req_month":16300.0,"per_day":543,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":true,"ii":27.0099232636747,"ii_est":true,"tb4":null,"hle":0.278498609823911,"tps":55.8034756336738,"ttft":101.63873889739507,"go_cost_task":null,"tok_in_task":null,"tok_out_task":null,"per_solve":null,"tb4_per_solve":null,"tb4_x":null,"heavy_month":null,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"DeepSeek V4.1 Flash","id":"deepseek-v4.1-flash","vendor":"DeepSeek","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":"Off-Peak","input":"$0.15","output":"$0.60","cache_read":"$0.003","cache_write":"-","limit":"$15","limit_promo":"$60","promo_note":"4x · Ends Sep 27"},{"tier":"Peak","input":"$0.30","output":"$1.20","cache_read":"$0.006","cache_write":"-","limit":"$15","limit_promo":"$60","promo_note":"4x · Ends Sep 27"}],"blend":0.26249999999999996,"allow":15.0,"allow_promo":60.0,"promo_note":"4x · Ends Sep 27","unlimited":false,"req_5h":6500.0,"req_month":32500.0,"per_day":1083,"training":"Not used","retention_days":"0 days*","aa_proxy_note":null,"aa_deprecated":false,"ii":39.456167472527,"ii_est":false,"tb4":0.267676767676768,"hle":0.392493049119555,"tps":231.827676022538,"ttft":9.544548177231553,"go_cost_task":0.14379482214305445,"tok_in_task":5147710.930532769,"tok_out_task":140770.5099295562,"per_solve":0.36444193988982226,"tb4_per_solve":2.341455969083238,"tb4_x":2.95415511670272,"heavy_month":104.31529992837456,"heavy_month_promo":417.26119971349823,"oc_usage_rank":1,"oc_retention":85,"oc_retention_rank":1},{"name":"DeepSeek V4 Pro","id":"deepseek-v4-pro","vendor":"DeepSeek","image":false,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":"Off-Peak","input":"$0.66","output":"$1.98","cache_read":"$0.022","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null},{"tier":"Peak","input":"$1.32","output":"$3.96","cache_read":"$0.044","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":0.99,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":1050.0,"req_month":5200.0,"per_day":173,"training":"Not used","retention_days":"0 days*","aa_proxy_note":null,"aa_deprecated":false,"ii":35.9967791278402,"ii_est":false,"tb4":0.141414141414141,"hle":0.410101946246525,"tps":67.0687211432341,"ttft":31.47566929379484,"go_cost_task":0.3864118959698763,"tok_in_task":3266307.0122140846,"tok_out_task":97821.57425312947,"per_solve":1.073462418950206,"tb4_per_solve":15.223692701684838,"tb4_x":19.20734375688503,"heavy_month":38.81868067842653,"heavy_month_promo":null,"oc_usage_rank":12,"oc_retention":null,"oc_retention_rank":null},{"name":"DeepSeek V4 Flash","id":"deepseek-v4-flash","vendor":"DeepSeek","image":false,"attachment":false,"context":1000000,"free":false,"price_tiers":[{"tier":"Off-Peak","input":"$0.15","output":"$0.60","cache_read":"$0.003","cache_write":"-","limit":"$30","limit_promo":null,"promo_note":null},{"tier":"Peak","input":"$0.30","output":"$1.20","cache_read":"$0.006","cache_write":"-","limit":"$30","limit_promo":null,"promo_note":null}],"blend":0.26249999999999996,"allow":30.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":13000.0,"req_month":65000.0,"per_day":2167,"training":"Not used","retention_days":"0 days*","aa_proxy_note":null,"aa_deprecated":true,"ii":34.3305129347816,"ii_est":false,"tb4":0.121212121212121,"hle":0.385542168674699,"tps":220.102656750342,"ttft":10.164830152924502,"go_cost_task":0.09039918991000162,"tok_in_task":1999789.2046769522,"tok_out_task":112249.36589482507,"per_solve":0.2633202424960409,"tb4_per_solve":3.1200373626844113,"tb4_x":3.9364713498698087,"heavy_month":331.8613809467428,"heavy_month_promo":null,"oc_usage_rank":3,"oc_retention":67.6,"oc_retention_rank":12},{"name":"DeepSeek V4 Flash Vision Exp","id":"deepseek-v4-flash-vision-exp","vendor":"DeepSeek","image":true,"attachment":true,"context":1000000,"free":false,"price_tiers":[{"tier":"Off-Peak","input":"$0.15","output":"$0.60","cache_read":"$0.003","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null},{"tier":"Peak","input":"$0.30","output":"$1.20","cache_read":"$0.006","cache_write":"-","limit":"$15","limit_promo":null,"promo_note":null}],"blend":0.26249999999999996,"allow":15.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":6500.0,"req_month":32500.0,"per_day":1083,"training":"Not used","retention_days":"0 days*","aa_proxy_note":null,"aa_deprecated":false,"ii":34.8390628035969,"ii_est":false,"tb4":0.121212121212121,"hle":0.344763670064875,"tps":214.456964444514,"ttft":10.295484364174362,"go_cost_task":0.1298226710912316,"tok_in_task":5006517.57507304,"tok_out_task":120195.91586823284,"per_solve":0.37263537145961423,"tb4_per_solve":4.35857458152288,"tb4_x":5.499102085006364,"heavy_month":115.54222289463523,"heavy_month_promo":null,"oc_usage_rank":10,"oc_retention":68,"oc_retention_rank":10},{"name":"Hy4 preview","id":"hy4-preview","vendor":"Tencent","image":false,"attachment":false,"context":1024000,"free":false,"price_tiers":[{"tier":null,"input":"$0.834","output":"$2.501","cache_read":"$0.042","cache_write":"-","limit":"$30","limit_promo":null,"promo_note":null}],"blend":1.25075,"allow":30.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":1350.0,"req_month":6770.0,"per_day":226,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":null,"ii":null,"ii_est":null,"tb4":null,"hle":null,"tps":null,"ttft":null,"go_cost_task":null,"tok_in_task":null,"tok_out_task":null,"per_solve":null,"tb4_per_solve":null,"tb4_x":null,"heavy_month":null,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":null,"oc_retention_rank":null},{"name":"Hy3","id":"hy3","vendor":"Tencent","image":false,"attachment":false,"context":256000,"free":false,"price_tiers":[{"tier":null,"input":"$0.14","output":"$0.58","cache_read":"$0.035","cache_write":"-","limit":"$60","limit_promo":null,"promo_note":null}],"blend":0.25,"allow":60.0,"allow_promo":null,"promo_note":null,"unlimited":false,"req_5h":4300.0,"req_month":21500.0,"per_day":717,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":false,"ii":25.2972775731571,"ii_est":false,"tb4":0.00505050505050505,"hle":0.334569045412419,"tps":85.8848934062664,"ttft":26.114205651788698,"go_cost_task":0.0718612993784713,"tok_in_task":582461.4753817581,"tok_out_task":82634.40923281874,"per_solve":0.28406732372942456,"tb4_per_solve":null,"tb4_x":null,"heavy_month":834.9417630760962,"heavy_month_promo":null,"oc_usage_rank":null,"oc_retention":71.1,"oc_retention_rank":6},{"name":"Space Bunny Free","id":"space-bunny-free","vendor":"Unknown（匿蹤）","image":true,"attachment":true,"context":1048576,"free":true,"price_tiers":[{"tier":null,"input":"Free","output":"Free","cache_read":"Free","cache_write":"-","limit":"Unlimited","limit_promo":null,"promo_note":"limited time"}],"blend":0.0,"allow":null,"allow_promo":null,"promo_note":"limited time","unlimited":true,"req_5h":null,"req_month":null,"per_day":null,"training":"Not used","retention_days":"0 days","aa_proxy_note":null,"aa_deprecated":null,"ii":null,"ii_est":null,"tb4":null,"hle":null,"tps":null,"ttft":null,"go_cost_task":null,"tok_in_task":null,"tok_out_task":null,"per_solve":null,"tb4_per_solve":null,"tb4_x":null,"heavy_month":null,"heavy_month_promo":null,"oc_usage_rank":4,"oc_retention":null,"oc_retention_rank":null}]}</script>
+<script id="freedata" type="application/json">[{"name":"Muse Spark 1.3 Contributor Free","id":"muse-spark-1.3-contributor-free","vendor":"Meta","image":true,"context":1048576,"ii":48.0923107719685,"ii_est":false,"tb4":0.333333333333333,"tps":206.590355880577,"aa_proxy_note":null,"note":"限時免費。prompt 與回覆用於訓練 Meta 模型、非 ZDR、限定地區。"},{"name":"Space Bunny Free","id":"space-bunny-free","vendor":"Unknown（匿蹤）","image":true,"context":1048576,"ii":null,"ii_est":null,"tb4":null,"tps":null,"aa_proxy_note":null,"note":"限時免費、Go 內不限量。官方註明供應商零保留、不用於訓練。無公開評測。"},{"name":"MiMo-V2.6-Flash Free","id":"mimo-v2.6-flash-free","vendor":"Xiaomi","image":true,"context":200000,"ii":null,"ii_est":null,"tb4":null,"tps":null,"aa_proxy_note":null,"note":"限時免費。免費期間資料可能用於改進模型。尚無公開評測。"},{"name":"Nemotron 3 Ultra Free","id":"nemotron-3-ultra-free","vendor":"NVIDIA","image":false,"context":1000000,"ii":22.9279123422858,"ii_est":false,"tb4":0.00505050505050505,"tps":120.715441116668,"aa_proxy_note":null,"note":"限時免費（NVIDIA 免費端點）。僅供試用，勿送個資或機密，使用會被記錄。"},{"name":"Ling 3.0 Flash Fin Free","id":"ling-3.0-flash-fin-free","vendor":"InclusionAI","image":false,"context":262144,"ii":22.5965828940594,"ii_est":false,"tb4":0,"tps":158.535716102158,"aa_proxy_note":null,"note":"限時免費。免費期間資料可能用於改進模型。"},{"name":"MiMo-V2.5 Free","id":"mimo-v2.5-free","vendor":"Xiaomi","image":true,"context":200000,"ii":25.1743063555572,"ii_est":true,"tb4":0,"tps":42.8677067277262,"aa_proxy_note":null,"note":"限時免費。免費期間資料可能用於改進模型。"},{"name":"Nemotron 3.5 Lightning Free","id":"nemotron-3.5-lightning-free","vendor":"NVIDIA","image":false,"context":262144,"ii":12.8572306217144,"ii_est":false,"tb4":0.00505050505050505,"tps":264.860905416034,"aa_proxy_note":null,"note":"限時免費（NVIDIA 免費端點）。僅供試用，使用會被記錄。"},{"name":"Big Pickle","id":"big-pickle","vendor":"Unknown（匿蹤）","image":false,"context":200000,"ii":null,"ii_est":null,"tb4":null,"tps":null,"aa_proxy_note":null,"note":"限時免費匿蹤模型。免費期間資料可能用於改進模型。無公開評測。"},{"name":"Jev 1.13 Free","id":"jev-1.13-free","vendor":"Unknown","image":false,"context":null,"ii":null,"ii_est":null,"tb4":null,"tps":null,"aa_proxy_note":null,"note":"限時免費。官方未說明資料條款；models.dev 與 AA 皆無資料。"}]</script>
+<script>
+(function(){
+"use strict";
+var D = JSON.parse(document.getElementById('data').textContent);
+var MODELS = D.models, META = D.meta;
+var FREE = JSON.parse(document.getElementById('freedata').textContent);
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function nil(v){ return v===null || v===undefined; }
+function fmt(n,d){ return nil(n) ? '—' : Number(n).toFixed(d===undefined?1:d); }
+function grp(n){ return nil(n) ? '—' : Math.round(n).toLocaleString('en-US'); }
+function pct(v){ return nil(v) ? '—' : (v*100).toFixed(1)+'%'; }
+function money(v){ if(nil(v)) return '—'; return '$'+(v<0.1 ? v.toFixed(3) : v<10 ? v.toFixed(2) : v.toFixed(1)); }
+function ctx(n){ if(nil(n)) return '—'; return n>=1000000 ? (n/1000000).toFixed(2).replace(/\.?0+$/,'')+'M' : Math.round(n/1000)+'K'; }
+function mtok(n){ return nil(n) ? '—' : n>=1e6 ? (n/1e6).toFixed(1)+'M' : Math.round(n/1e3)+'K'; }
+function id2(x){ return MODELS.filter(function(m){ return m.id===x; })[0]; }
+function col(m){ return m.image ? 'var(--s1)' : 'var(--s2)'; }
+function promoDate(note){
+  var mm = /Ends\s+([A-Za-z]{3})\s+(\d+)/.exec(note||'');
+  var mon = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  return mm ? mon[mm[1]]+'/'+mm[2] : '';
+}
+MODELS.forEach(function(m){
+  var t = (m.price_tiers||[])[0] || {};
+  m._in = m.free ? 'Free' : (t.input||'—'); m._out = m.free ? 'Free' : (t.output||'—');
+  m._tiered = (m.price_tiers||[]).length > 1;
+});
+
+/* ---------- header counters ---------- */
+document.getElementById('eyebrow').textContent =
+  '$10 / 月訂閱 · '+MODELS.length+' 個模型 · '+META.n_image+' 個可讀圖片 · '+FREE.length+' 個免費';
+var upd = META.updated.replace(/^([A-Za-z]{3})\s+(\d+),\s+(\d{4})$/, function(_,mo,d,y){
+  return y+'-'+String({Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12}[mo]).padStart(2,'0')+'-'+String(d).padStart(2,'0'); });
+document.getElementById('stamp').innerHTML = '官方文件 '+esc(upd)+' 更新<br>opencode.ai/docs/go · opencode.ai/data<br>models.dev · artificialanalysis.ai';
+document.getElementById('upd').textContent = upd;
+document.getElementById('cache-pct').textContent = (META.cache*100).toFixed(1)+'%';
+document.getElementById('all-n').textContent = MODELS.length;
+document.getElementById('free-n').textContent = FREE.length;
+
+/* ---------- Pareto: TB4 up, general per-solve down ---------- */
+var RATED = MODELS.filter(function(m){ return m.per_solve && !nil(m.tb4); });
+function beats(b,a){ return b.tb4>=a.tb4 && b.per_solve<=a.per_solve && (b.tb4>a.tb4 || b.per_solve<a.per_solve); }
+var FRONT = RATED.filter(function(a){ return !RATED.some(function(b){ return b!==a && beats(b,a); }); })
+                 .sort(function(a,b){ return a.per_solve-b.per_solve; });
+var PICK_IDS = ['muse-spark-1.3-contributor','mimo-v2.6-pro','glm-5.3','deepseek-v4.1-flash'];
+var PICKS = PICK_IDS.map(id2).filter(Boolean);
+var m13 = id2('muse-spark-1.3-contributor'), mp = id2('mimo-v2.6-pro'), g53 = id2('glm-5.3'),
+    ds = id2('deepseek-v4.1-flash'), m12 = id2('muse-spark-1.2-contributor'), sb = id2('space-bunny-free');
+var SOLVED = MODELS.filter(function(m){ return m.per_solve; }).sort(function(a,b){ return a.per_solve-b.per_solve; });
+var rankOf = function(m){ return SOLVED.indexOf(m)+1; };
+var x13 = function(v){ return (v/m13.per_solve).toFixed(1); };
+
+/* ---------- picks ---------- */
+var ROLE = {
+  'muse-spark-1.3-contributor': ['主力 · 一般＋困難',
+    '智能 <b>'+fmt(m13.ii)+'</b> 為 Go 第一，困難任務每解一題最便宜（'+money(m13.tb4_per_solve)+'）；一般任務每成功 '+money(m13.per_solve)
+    +'，是 DeepSeek V4.1 Flash 的 1/'+(ds.per_solve/m13.per_solve).toFixed(1)+'。月額度約 '+grp(m13.heavy_month)
+    +' 個重度任務，幾乎不會卡。代價：資料用於訓練 Meta 模型、非 ZDR、限定地區。'],
+  'mimo-v2.6-pro': ['困難任務 · 資料不外流',
+    'Terminal-Bench 4.0 <b>'+pct(mp.tb4)+'</b>、HLE <b>'+pct(mp.hle)+'</b>，兩項都高於 Muse Spark 1.3（'+pct(m13.tb4)+'、'+pct(m13.hle)
+    +'）；每解一題 '+money(mp.tb4_per_solve)+'，只是 Muse 的 '+(mp.tb4_per_solve/m13.tb4_per_solve).toFixed(1)+' 倍。0 天保留、可讀圖。缺點：'
+    +fmt(mp.tps,0)+' tok/s 偏慢，月額度約 '+grp(mp.heavy_month)+' 個重度任務。'],
+  'glm-5.3': ['最難任務 · 最後一招',
+    'Terminal-Bench 4.0 <b>'+pct(g53.tb4)+'</b> 為 Go 最高，比 Muse Spark 1.3 多解 '+Math.round((g53.tb4/m13.tb4-1)*100)
+    +'%。但每解一題 '+money(g53.tb4_per_solve)+'（'+Math.round(g53.tb4_per_solve/m13.tb4_per_solve)+' 倍），月額度只夠約 '
+    +grp(g53.heavy_month)+' 個重度任務 — 前兩個解不出時才叫。純文字。'],
+  'deepseek-v4.1-flash': ['秒回 · 一般任務',
+    '首字 <b>'+fmt(ds.ttft,0)+' 秒</b>、'+fmt(ds.tps,0)+' tok/s，OpenCode 留存率 '+fmt(ds.oc_retention)+'% 排第 '+ds.oc_retention_rank
+    +'。但每成功任務是 Muse Spark 1.3 的 '+x13(ds.per_solve)+' 倍、困難任務只解 '+pct(ds.tb4)+'。4× 額度優惠至 '
+    +promoDate(ds.promo_note)+'，之後月額度約 '+grp(ds.heavy_month)+' 個重度任務。資料 0 天保留。']
+};
+document.getElementById('picks').innerHTML = PICKS.map(function(m,i){
+  var r = ROLE[m.id];
+  return '<div class="pick'+(i===0?' top':'')+(m.training==='Yes'?' warn-pick':'')+'">'
+    + '<div class="rank"><span class="role">'+esc(r[0])+'</span><span class="n">'+(i+1)+'</span></div>'
+    + '<div class="model">'+esc(m.name)+'</div>'
+    + '<div class="id">opencode-go/'+esc(m.id)+'</div>'
+    + '<p>'+r[1]+'</p>'
+    + '<div class="stats">'
+      + '<span class="chip hi">每成功 '+money(m.per_solve)+'</span>'
+      + '<span class="chip hi">TB4 '+pct(m.tb4)+'</span>'
+      + '<span class="chip">智能 '+fmt(m.ii)+'</span>'
+      + '<span class="chip">重度 '+grp(m.heavy_month)+'/月</span>'
+      + '<span class="chip">'+grp(m.per_day)+' 次/天</span>'
+      + '<span class="chip">首字 '+fmt(m.ttft,0)+'s</span>'
+      + '<span class="chip">'+(m.image?'可讀圖片':'純文字')+'</span>'
+    + '</div></div>';
+}).join('');
+
+/* ---------- 最終建議設定 ---------- */
+var PAIR = [
+  ['日常主力<br><span class="subtle">一般＋困難</span>', 'opencode-go/muse-spark-1.3-contributor',
+   '<b>兩種任務都在 Pareto 前緣上</b>：一般任務每成功 '+money(m13.per_solve)+'（第 '+rankOf(m13)+' 便宜）、困難任務每解一題全表最便宜，智能 Go 第一，額度 '
+   +grp(m13.per_day)+' 次/天。若不介意資料用於訓練，沒有理由換掉它。'],
+  ['要秒回的一般任務<br><span class="subtle">或資料不能外流</span>', 'opencode-go/deepseek-v4.1-flash',
+   '<b>首字 '+fmt(ds.ttft,0)+' 秒，是 Muse（'+fmt(m13.ttft,0)+' 秒）的 1/'+(m13.ttft/ds.ttft).toFixed(0)+'</b>；OpenCode 留存率第 '+ds.oc_retention_rank
+   +'。每成功任務貴 '+x13(ds.per_solve)+' 倍，換到的是反應速度與 0 天保留。'],
+  ['困難任務<br><span class="subtle">資料不能外流</span>', 'opencode-go/mimo-v2.6-pro',
+   '<b>TB 4.0 與 HLE 都贏 Muse Spark 1.3</b>，每解一題只貴 '+(mp.tb4_per_solve/m13.tb4_per_solve).toFixed(1)+' 倍，且 0 天保留、不訓練。慢（'
+   +fmt(mp.tps,0)+' tok/s），適合丟出去等結果。'],
+  ['Muse 解不出的<br><span class="subtle">最難 agent 任務</span>', 'opencode-go/glm-5.3',
+   '<b>TB 4.0 '+pct(g53.tb4)+'，Go 最高</b>。每月只夠約 '+grp(g53.heavy_month)+' 個重度任務、'+grp(g53.per_day)+' 次/天 — 當升級通道，不當常駐。'],
+  ['額度用完<br><span class="subtle">免費退路</span>', 'opencode-go/space-bunny-free<br>muse-spark-1.3-contributor-free',
+   '<b>Space Bunny Free</b> 在 Go 內不限量、零保留、可讀圖（限時，無評測）；<b>Muse Spark 1.3 Free</b> 能力＝全表第一（資料用於訓練）。']
+];
+document.getElementById('pairbody').innerHTML = PAIR.map(function(p){
+  return '<tr><td>'+p[0]+'</td><td>'+p[1]+'</td><td>'+p[2]+'</td></tr>';
+}).join('');
+
+/* ---------- 不選的理由 ---------- */
+var ORDER_JUDGE = PICKS.concat(FRONT.filter(function(m){ return PICKS.indexOf(m)<0; }));
+function why(m){
+  if(!m.per_solve){
+    if(m.free) return {k:'none', cls:'r-none', label:'免費無評測', t:'限時免費、不限量，但無任何公開評測。可當額度用完的退路。'};
+    if(nil(m.ii)) return {k:'none', cls:'r-none', label:'無評測', t:'沒有公開評測資料，無法比較。'};
+    return {k:'none', cls:'r-none', label:'無成本資料', t:'AA 未公布 token 用量，無法算成本；智能 '+fmt(m.ii)+' 屬末段。'};
+  }
+  var by = null;
+  ORDER_JUDGE.forEach(function(b){ if(!by && b!==m && beats(b,m)) by=b; });
+  var extra = (m.per_day && m.per_day<100) ? '；每天只約 '+grp(m.per_day)+' 次' : '';
+  if(by) return {k:'dom', cls:'r-dom', label:'被壓制',
+    t:'輸給 '+shortName(by.name)+'（TB4 '+pct(by.tb4)+'、每成功 '+money(by.per_solve)+'）'+extra+'。'};
+  return {k:'weak', cls:'r-weak', label:'太弱',
+    t:'每成功任務最便宜（'+money(m.per_solve)+'），但困難任務只解 '+pct(m.tb4)+'；Muse Spark 1.3 只貴 '+(m13.per_solve/m.per_solve).toFixed(1)
+      +' 倍、解題率 '+(m13.tb4/m.tb4).toFixed(1)+' 倍'+(m.aa_deprecated?'，且 AA 已標為舊版':'')+'。'};
+}
+var OUT = MODELS.filter(function(m){ return PICKS.indexOf(m)<0; });
+var ORDK = {weak:0, dom:1, none:2};
+document.getElementById('out-n').textContent = OUT.length;
+document.getElementById('exbody').innerHTML = OUT.slice().sort(function(a,b){
+  var wa=why(a), wb=why(b);
+  if(ORDK[wa.k]!==ORDK[wb.k]) return ORDK[wa.k]-ORDK[wb.k];
+  return (a.per_solve||9e9)-(b.per_solve||9e9);
+}).map(function(m){
+  var w = why(m);
+  return '<tr><td class="name"><span class="dot" style="background:'+col(m)+'"></span>'+esc(m.name)+'</td>'
+    + '<td class="n">'+fmt(m.ii)+'</td><td class="n">'+pct(m.tb4)+'</td>'
+    + '<td class="n">'+money(m.per_solve)+'</td><td class="n">'+(m.unlimited?'∞':grp(m.per_day))+'</td>'
+    + '<td class="why"><span class="reason '+w.cls+'">'+w.label+'</span>'+esc(w.t)+'</td></tr>';
+}).join('');
+
+/* ---------- tooltip ---------- */
+function tipHTML(m){
+  function row(k,v){ return '<div class="trow"><span>'+k+'</span><b>'+v+'</b></div>'; }
+  return '<div class="tname">'+esc(m.name)+'</div>'
+    + row('智能指數', fmt(m.ii)+(m.ii_est?' †':''))
+    + row('TB 4.0 答對', pct(m.tb4))
+    + (m.per_solve ? row('每成功（一般）', money(m.per_solve)+'（'+(m.per_solve/SOLVED[0].per_solve).toFixed(1)+'×）') : '')
+    + (m.tb4_per_solve ? row('每解一題（困難）', money(m.tb4_per_solve)) : '')
+    + row('速度', fmt(m.tps,0)+' tok/s')
+    + row('首字', fmt(m.ttft,0)+' s')
+    + row('每天可用', m.unlimited?'不限':grp(m.per_day)+' 次')
+    + (m.heavy_month ? row('重度任務/月', grp(m.heavy_month)) : '')
+    + row('單價 入/出', esc(m._in)+' / '+esc(m._out))
+    + (m.oc_retention ? row('OpenCode 留存', fmt(m.oc_retention)+'%') : '')
+    + (m.aa_proxy_note ? '<div class="trow" style="margin-top:4px;font-size:11.5px">近似對照值</div>' : '');
+}
+function wireTip(card, tip){
+  card.addEventListener('mouseover', function(e){
+    var t = e.target.closest('[data-idx]'); if(!t) return;
+    tip.innerHTML = tipHTML(MODELS[+t.getAttribute('data-idx')]);
+    var cb = card.getBoundingClientRect(), tb = t.getBoundingClientRect();
+    tip.style.left = Math.max(105, Math.min(cb.width-105, tb.left-cb.left+tb.width/2))+'px';
+    tip.style.top = Math.max(185, tb.top-cb.top-8)+'px';
+    tip.classList.add('on');
+  });
+  card.addEventListener('mouseout', function(e){ if(e.target.closest('[data-idx]')) tip.classList.remove('on'); });
+}
+
+/* ---------- label placer shared by scatters ---------- */
+function placeLabels(items, W, T, ph, L){
+  var boxes=[], out=[];
+  items.forEach(function(it){
+    var w = it.txt.length*6.3+6;
+    var cands = [{x:it.cx+it.r+6,y:it.cy+4,a:'start'},{x:it.cx-it.r-6,y:it.cy+4,a:'end'},
+                 {x:it.cx,y:it.cy-it.r-7,a:'middle'},{x:it.cx,y:it.cy+it.r+13,a:'middle'}];
+    for(var k=0;k<cands.length;k++){
+      var c=cands[k], x0 = c.a==='start'?c.x:(c.a==='end'?c.x-w:c.x-w/2);
+      var b={x0:x0-2,y0:c.y-11,x1:x0+w+2,y1:c.y+4};
+      if(b.x0<L-50 || b.x1>W-4 || b.y0<T-4 || b.y1>T+ph+2) continue;
+      if(boxes.some(function(o){ return !(b.x1<o.x0||b.x0>o.x1||b.y1<o.y0||b.y0>o.y1); })) continue;
+      boxes.push(b);
+      out.push('<text x="'+c.x.toFixed(1)+'" y="'+c.y.toFixed(1)+'" text-anchor="'+c.a+'" font-size="11" '
+        +(it.bold?'font-weight="600" fill="var(--ink)"':'fill="var(--ink-2)"')
+        +' paint-order="stroke" stroke="var(--surface)" stroke-width="3.5" stroke-linejoin="round">'+esc(it.txt)+'</text>');
+      break;
+    }
+  });
+  return out.join('');
+}
+function shortName(n){ return n.replace(' Contributor','').replace(' Vision Exp',' Vision'); }
+
+/* ---------- chart 1: TB4 vs per-solve ---------- */
+function drawSolve(){
+  var W=880, H=500, L=64, R=24, T=28, B=56, pw=W-L-R, ph=H-T-B;
+  var lo=Math.log10(0.07), hi=Math.log10(14);
+  var X=function(v){ return L+(Math.log10(v)-lo)/(hi-lo)*pw; };
+  var yMax=0.45, Y=function(v){ return T+(yMax-v)/yMax*ph; };
+  var dlo=Math.log10(16), dhi=Math.log10(7553);
+  var Rad=function(d){ return 4.5+(Math.log10(Math.max(d||16,16))-dlo)/(dhi-dlo)*8.5; };
+  var s=['<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" role="img" aria-label="困難任務解題率與一般任務每成功成本">'];
+  [0.1,0.25,0.5,1,2.5,5,10].forEach(function(v){
+    s.push('<line x1="'+X(v)+'" y1="'+T+'" x2="'+X(v)+'" y2="'+(T+ph)+'" stroke="var(--rule)"/>');
+    s.push('<text x="'+X(v)+'" y="'+(T+ph+19)+'" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">$'+v+'</text>');
+  });
+  for(var gy=0; gy<=0.4001; gy+=0.1){
+    s.push('<line x1="'+L+'" y1="'+Y(gy)+'" x2="'+(L+pw)+'" y2="'+Y(gy)+'" stroke="var(--rule)"/>');
+    s.push('<text x="'+(L-10)+'" y="'+(Y(gy)+4)+'" text-anchor="end" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">'+Math.round(gy*100)+'%</text>');
+  }
+  s.push('<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(L+pw)+'" y2="'+(T+ph)+'" stroke="var(--rule-2)"/>');
+  s.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(T+ph)+'" stroke="var(--rule-2)"/>');
+  s.push('<text x="'+(L+pw)+'" y="'+(T+ph+42)+'" text-anchor="end" font-family="var(--mono)" font-size="11.5" fill="var(--ink-2)">一般任務每成功成本（Go 價）→ 越左越省</text>');
+  s.push('<text x="'+(L-52)+'" y="'+(T-10)+'" font-family="var(--mono)" font-size="11.5" fill="var(--ink-2)">↑ 困難任務解題率（Terminal-Bench 4.0）</text>');
+  var pts = FRONT.map(function(m){ return X(m.per_solve).toFixed(1)+','+Y(m.tb4).toFixed(1); });
+  s.push('<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="5 4"/>');
+  RATED.slice().sort(function(a,b){ return (b.per_day||0)-(a.per_day||0); }).forEach(function(m){
+    var pick = PICKS.indexOf(m)>=0;
+    s.push('<circle data-idx="'+MODELS.indexOf(m)+'" cx="'+X(m.per_solve).toFixed(1)+'" cy="'+Y(m.tb4).toFixed(1)+'" r="'+Rad(m.per_day).toFixed(1)
+      +'" fill="'+col(m)+'" fill-opacity="'+(pick?'0.95':'0.62')+'" stroke="'+(pick?'var(--ink)':'var(--surface)')+'" stroke-width="'+(pick?'2.2':'1.8')+'"><title>'+esc(m.name)+'</title></circle>');
+  });
+  var items = PICKS.concat(RATED.filter(function(m){ return PICKS.indexOf(m)<0; }).sort(function(a,b){ return b.tb4-a.tb4; }))
+    .filter(function(m){ return RATED.indexOf(m)>=0; })
+    .map(function(m){ return {cx:X(m.per_solve), cy:Y(m.tb4), r:Rad(m.per_day), txt:shortName(m.name), bold:PICKS.indexOf(m)>=0}; });
+  s.push(placeLabels(items, W, T, ph, L));
+  s.push('</svg>');
+  document.getElementById('solve').innerHTML = s.join('');
+}
+
+/* ---------- solve table ---------- */
+document.getElementById('solvebody').innerHTML = SOLVED.map(function(m){
+  var pick = PICKS.indexOf(m)>=0;
+  return '<tr'+(pick?' class="pickrow"':'')+'><td class="name"><span class="dot" style="background:'+col(m)+'"></span>'+(pick?'<b>'+esc(m.name)+'</b>':esc(m.name))+'</td>'
+    + '<td class="n">'+fmt(m.ii)+'</td><td class="n">'+pct(m.tb4)+'</td><td class="n">'+m.blend.toFixed(3)+'</td>'
+    + '<td class="n">'+mtok(m.tok_in_task)+' / '+mtok(m.tok_out_task)+'</td>'
+    + '<td class="n">'+money(m.go_cost_task)+'</td>'
+    + '<td class="n"><b>'+money(m.per_solve)+'</b></td><td class="n">'+(m.per_solve/SOLVED[0].per_solve).toFixed(1)+'×</td>'
+    + '<td class="n">'+(m.tb4_per_solve?'<b>'+money(m.tb4_per_solve)+'</b>':'<span class="est">解不出</span>')+'</td>'
+    + '<td class="n">'+(m.tb4_x?m.tb4_x.toFixed(1)+'×':'—')+'</td>'
+    + '<td class="n">'+grp(m.heavy_month)+(m.heavy_month_promo?'<span class="est"> (優惠 '+grp(m.heavy_month_promo)+')</span>':'')+'</td>'
+    + '<td class="n">'+grp(m.per_day)+'</td></tr>';
+}).join('');
+
+/* ---------- chart 2: intelligence x speed ---------- */
+function drawScatter(){
+  var pts = MODELS.filter(function(m){ return !nil(m.ii) && !nil(m.tps); });
+  var skipped = MODELS.filter(function(m){ return nil(m.ii) || nil(m.tps); }).map(function(m){ return m.name; });
+  document.getElementById('scatter-note').textContent = '未列入（缺智能或速度資料）：'+skipped.join('、')+'。';
+  var W=880, H=520, L=70, R=24, T=28, B=56, pw=W-L-R, ph=H-T-B;
+  var xMin=20, xMax=50, yMax=260;
+  var X=function(v){ return L+(v-xMin)/(xMax-xMin)*pw; }, Y=function(v){ return T+(yMax-v)/yMax*ph; };
+  var dlo=Math.log10(16), dhi=Math.log10(7553);
+  var Rad=function(d){ return 4.5+(Math.log10(Math.max(d||16,16))-dlo)/(dhi-dlo)*8.5; };
+  var s=['<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" role="img" aria-label="智能指數與輸出速度">'];
+  for(var gx=20; gx<=50; gx+=5){
+    s.push('<line x1="'+X(gx)+'" y1="'+T+'" x2="'+X(gx)+'" y2="'+(T+ph)+'" stroke="var(--rule)"/>');
+    s.push('<text x="'+X(gx)+'" y="'+(T+ph+19)+'" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">'+gx+'</text>');
+  }
+  for(var gy=0; gy<=yMax; gy+=50){
+    s.push('<line x1="'+L+'" y1="'+Y(gy)+'" x2="'+(L+pw)+'" y2="'+Y(gy)+'" stroke="var(--rule)"/>');
+    s.push('<text x="'+(L-10)+'" y="'+(Y(gy)+4)+'" text-anchor="end" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">'+gy+'</text>');
+  }
+  s.push('<line x1="'+L+'" y1="'+(T+ph)+'" x2="'+(L+pw)+'" y2="'+(T+ph)+'" stroke="var(--rule-2)"/>');
+  s.push('<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(T+ph)+'" stroke="var(--rule-2)"/>');
+  s.push('<text x="'+(L+pw)+'" y="'+(T+ph+42)+'" text-anchor="end" font-family="var(--mono)" font-size="11.5" fill="var(--ink-2)">能力更強 · 智能指數 →</text>');
+  s.push('<text x="'+(L-56)+'" y="'+(T-10)+'" font-family="var(--mono)" font-size="11.5" fill="var(--ink-2)">↑ 更快 · 輸出 tokens/秒</text>');
+  pts.slice().sort(function(a,b){ return (b.per_day||0)-(a.per_day||0); }).forEach(function(m){
+    var pick = PICKS.indexOf(m)>=0, proxy = !!m.aa_proxy_note;
+    s.push('<circle data-idx="'+MODELS.indexOf(m)+'" cx="'+X(m.ii).toFixed(1)+'" cy="'+Y(m.tps).toFixed(1)+'" r="'+Rad(m.per_day).toFixed(1)+'"'
+      +' fill="'+(proxy?'none':col(m))+'" fill-opacity="'+(pick?'0.95':'0.7')+'" stroke="'+(pick?'var(--ink)':(proxy?col(m):'var(--surface)'))+'" stroke-width="'+(pick?'2.2':'1.8')+'"'
+      +(proxy?' stroke-dasharray="3 2"':'')+'><title>'+esc(m.name)+'</title></circle>');
+  });
+  var items = PICKS.filter(function(m){ return pts.indexOf(m)>=0; })
+    .concat(pts.filter(function(m){ return PICKS.indexOf(m)<0; }).sort(function(a,b){ return b.ii-a.ii; }))
+    .map(function(m){ return {cx:X(m.ii), cy:Y(m.tps), r:Rad(m.per_day), txt:shortName(m.name)+(m.aa_proxy_note?'*':''), bold:PICKS.indexOf(m)>=0}; });
+  s.push(placeLabels(items, W, T, ph, L));
+  s.push('</svg>');
+  document.getElementById('scatter').innerHTML = s.join('');
+}
+
+/* ---------- chart 3: ladder ---------- */
+function drawLadder(){
+  var rows = MODELS.filter(function(m){ return !nil(m.ii); }).sort(function(a,b){ return b.ii-a.ii; });
+  var top = rows[0].ii;
+  var TIERS = [{k:'T0',label:'頂級',min:top*0.90,note:'差距 ≤10%'},{k:'T1',label:'一線',min:top*0.75,note:'≤25%'},
+               {k:'T2',label:'中段',min:top*0.60,note:'≤40%'},{k:'T3',label:'末段',min:-1,note:'其餘'}];
+  var W=880, L=214, RGT=132, rowH=25, hdrH=33, T=24, barW=W-L-RGT, xMax=Math.ceil(top/5)*5+2;
+  var groups=[];
+  TIERS.forEach(function(t,ti){
+    var upper = ti===0 ? 999 : TIERS[ti-1].min;
+    var mem = rows.filter(function(m){ return m.ii>=t.min && m.ii<upper; });
+    if(mem.length) groups.push({t:t, mem:mem});
+  });
+  var H = T + groups.reduce(function(a,g){ return a+hdrH+g.mem.length*rowH; },0) + 36;
+  var s=['<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" role="img" aria-label="智能指數天梯">'], y=T, rank=0;
+  groups.forEach(function(g){
+    s.push('<line x1="0" y1="'+(y+6)+'" x2="'+W+'" y2="'+(y+6)+'" stroke="var(--rule-2)"/>');
+    s.push('<text x="0" y="'+(y+24)+'" font-family="var(--mono)" font-size="12" font-weight="600" fill="var(--accent)">'+g.t.k+'</text>');
+    s.push('<text x="30" y="'+(y+24)+'" font-size="12.5" font-weight="600" fill="var(--ink)">'+g.t.label+'</text>');
+    s.push('<text x="'+(L-8)+'" y="'+(y+24)+'" text-anchor="end" font-family="var(--mono)" font-size="10.5" fill="var(--ink-3)">'+g.t.note+' · '+g.mem.length+' 個</text>');
+    s.push('<text x="'+(L+barW+8)+'" y="'+(y+24)+'" font-family="var(--mono)" font-size="10" fill="var(--ink-3)">指數 · 次/天</text>');
+    y += hdrH;
+    g.mem.forEach(function(m){
+      rank++;
+      var cy=y+rowH/2, pick=PICKS.indexOf(m)>=0;
+      s.push('<g data-idx="'+MODELS.indexOf(m)+'"><rect x="0" y="'+y+'" width="'+W+'" height="'+rowH+'" fill="transparent" pointer-events="all"/>');
+      s.push('<text x="18" y="'+(cy+4)+'" text-anchor="end" font-family="var(--mono)" font-size="10.5" fill="var(--ink-3)">'+rank+'</text>');
+      s.push('<text x="'+(L-10)+'" y="'+(cy+4)+'" text-anchor="end" font-size="12.5" '+(pick?'font-weight="600" ':'')+'fill="var(--ink)">'+esc(m.name)
+        +(m.ii_est?'<tspan fill="var(--ink-3)" font-size="10"> †</tspan>':'')+(m.aa_proxy_note?'<tspan fill="var(--ink-3)" font-size="10"> *</tspan>':'')+'</text>');
+      s.push('<rect x="'+L+'" y="'+(y+5)+'" width="'+Math.max(3,m.ii/xMax*barW).toFixed(1)+'" height="'+(rowH-10)+'" rx="4" fill="'+col(m)+'"/>');
+      s.push('<text x="'+(L+barW+8)+'" y="'+(cy+4)+'" font-family="var(--mono)" font-size="11.5" font-weight="500" fill="var(--ink)">'+fmt(m.ii)+'</text>');
+      s.push('<text x="'+(W-4)+'" y="'+(cy+4)+'" text-anchor="end" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">'+(m.unlimited?'∞':grp(m.per_day))+'</text></g>');
+      y += rowH;
+    });
+  });
+  var un = MODELS.filter(function(m){ return nil(m.ii); });
+  y += 12;
+  s.push('<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="var(--rule-2)" stroke-dasharray="4 3"/>');
+  s.push('<text x="0" y="'+(y+18)+'" font-size="12" fill="var(--ink-3)">無評測：'+esc(un.map(function(m){ return m.name; }).join('、'))+'</text>');
+  s.push('</svg>');
+  document.getElementById('ladder').innerHTML = s.join('');
+}
+
+/* ---------- master table ---------- */
+function bandOf(m){
+  if(m.unlimited) return '<span class="badge b-max">免費 · 不限</span>';
+  if(nil(m.allow)) return '—';
+  var a = m.allow, cl = a>=60?'b-wide':(a>=30?'b-mid':'b-tight'), lb = a>=60?'寬':(a>=30?'中':'緊');
+  var s = '<span class="badge '+cl+'">'+lb+' · '+(a/10)+'×</span>';
+  if(m.allow_promo) s += ' <span class="badge b-max">優惠 '+(m.allow_promo/10)+'× 至 '+promoDate(m.promo_note)+'</span>';
+  return s;
+}
+var COLS = [
+  {k:'name', t:'模型', cls:'name', get:function(m){ return m.name; },
+   html:function(m){ return '<span class="dot" style="background:'+col(m)+'"></span>'+esc(m.name)+'<span class="mid">opencode-go/'+esc(m.id)+'</span>'; }},
+  {k:'vendor', t:'供應商', get:function(m){ return m.vendor; }, html:function(m){ return esc(m.vendor); }},
+  {k:'image', t:'圖片', get:function(m){ return m.image?1:0; },
+   html:function(m){ return m.image ? (m.attachment?'<span class="badge b-wide">可讀圖</span>':'<span class="badge b-mid">模型支援*</span>') : '<span style="color:var(--ink-3)">純文字</span>'; }},
+  {k:'ii', t:'智能', cls:'n', num:true, get:function(m){ return m.ii; },
+   html:function(m){ return nil(m.ii)?'—':fmt(m.ii)+(m.ii_est?'<span class="est"> †</span>':'')+(m.aa_proxy_note?'<span class="est"> *</span>':''); }},
+  {k:'tb4', t:'TB 4.0', cls:'n', num:true, get:function(m){ return m.tb4; }, html:function(m){ return pct(m.tb4); }},
+  {k:'tps', t:'速度', cls:'n', num:true, get:function(m){ return m.tps; }, html:function(m){ return fmt(m.tps,0); }},
+  {k:'ttft', t:'首字 秒', cls:'n', num:true, get:function(m){ return m.ttft; }, html:function(m){ return fmt(m.ttft,0); }},
+  {k:'price', t:'$/M 入→出', cls:'n', get:function(m){ return m.blend; },
+   html:function(m){ return m.free?'Free':esc(m._in.replace('$',''))+' → '+esc(m._out.replace('$',''))+(m._tiered?'<span class="est"> ▸</span>':''); }, num:true},
+  {k:'allow', t:'額度', num:true, get:function(m){ return m.unlimited?999:m.allow; }, html:bandOf},
+  {k:'day', t:'次/天', cls:'n', num:true, get:function(m){ return m.unlimited?1e9:m.per_day; }, html:function(m){ return m.unlimited?'∞':grp(m.per_day); }},
+  {k:'solve', t:'每成功 $', cls:'n', num:true, get:function(m){ return nil(m.per_solve)?null:-m.per_solve; }, html:function(m){ return money(m.per_solve); }},
+  {k:'heavy', t:'重度/月', cls:'n', num:true, get:function(m){ return m.heavy_month; }, html:function(m){ return grp(m.heavy_month); }},
+  {k:'ret', t:'OC 留存', cls:'n', num:true, get:function(m){ return m.oc_retention; }, html:function(m){ return nil(m.oc_retention)?'—':fmt(m.oc_retention)+'%'; }},
+  {k:'use', t:'OC 用量', cls:'n', num:true, get:function(m){ return nil(m.oc_usage_rank)?null:-m.oc_usage_rank; }, html:function(m){ return nil(m.oc_usage_rank)?'—':'#'+m.oc_usage_rank; }},
+  {k:'ctx', t:'上下文', cls:'n', num:true, get:function(m){ return m.context; }, html:function(m){ return ctx(m.context); }},
+  {k:'priv', t:'資料', get:function(m){ return m.training; },
+   html:function(m){ return m.training==='Yes'?'<span class="badge b-tight">用於訓練</span>':'保留 '+esc(String(m.retention_days).replace(' days',' 天').replace('*','')); }}
+];
+var sortKey='ii', sortDir=-1, viewMode='group';
+function cmp(a,b){
+  var c = COLS.filter(function(x){ return x.k===sortKey; })[0], va=c.get(a), vb=c.get(b);
+  if(c.num){ if(nil(va)) return 1; if(nil(vb)) return -1; return (va-vb)*sortDir; }
+  return String(va).localeCompare(String(vb))*sortDir;
+}
+function renderHead(){
+  document.getElementById('thead').innerHTML = '<tr>'+COLS.map(function(c){
+    return '<th data-k="'+c.k+'" scope="col">'+esc(c.t)+(c.k===sortKey?' <span class="ar">'+(sortDir<0?'↓':'↑')+'</span>':'')+'</th>';
+  }).join('')+'</tr>';
+  var c = COLS.filter(function(x){ return x.k===sortKey; })[0];
+  document.getElementById('sort-label').textContent = c.t+(sortDir<0?' ↓':' ↑');
+}
+function rowHTML(m){ return '<tr'+(PICKS.indexOf(m)>=0?' class="pickrow"':'')+'>'+COLS.map(function(c){ return '<td class="'+(c.cls||'')+'">'+c.html(m)+'</td>'; }).join('')+'</tr>'; }
+function renderBody(){
+  var b='';
+  if(viewMode==='group'){
+    [[true,'可讀圖片'],[false,'純文字']].forEach(function(g){
+      var set = MODELS.filter(function(m){ return m.image===g[0]; }).sort(cmp);
+      b += '<tr class="grp"><th colspan="'+COLS.length+'" scope="colgroup">'+g[1]+' · '+set.length+' 個</th></tr>'+set.map(rowHTML).join('');
+    });
+  } else b = MODELS.slice().sort(cmp).map(rowHTML).join('');
+  document.getElementById('tbody').innerHTML = b;
+}
+document.getElementById('thead').addEventListener('click', function(e){
+  var th = e.target.closest('th[data-k]'); if(!th) return;
+  var k = th.getAttribute('data-k');
+  if(k===sortKey) sortDir=-sortDir; else { sortKey=k; sortDir = COLS.filter(function(c){ return c.k===k; })[0].num ? -1 : 1; }
+  renderHead(); renderBody();
+});
+Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function(btn){
+  btn.addEventListener('click', function(){
+    viewMode = btn.getAttribute('data-view');
+    Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function(x){ x.setAttribute('aria-pressed', String(x===btn)); });
+    renderBody();
+  });
+});
+
+/* ---------- free table ---------- */
+document.getElementById('ftbody').innerHTML = FREE.map(function(m){
+  return '<tr><td class="name"><span class="dot" style="background:'+(m.image?'var(--s1)':'var(--s2)')+'"></span>'+esc(m.name)+'</td>'
+    + '<td><code style="font-size:11.5px">'+esc(m.id)+'</code></td><td>'+esc(m.vendor)+'</td>'
+    + '<td>'+(m.image?'<span class="badge b-wide">可讀圖</span>':'<span style="color:var(--ink-3)">純文字</span>')+'</td>'
+    + '<td class="n">'+fmt(m.ii)+(m.ii_est?'<span class="est"> †</span>':'')+'</td><td class="n">'+pct(m.tb4)+'</td>'
+    + '<td class="n">'+fmt(m.tps,0)+'</td><td class="n">'+ctx(m.context)+'</td>'
+    + '<td class="why">'+esc(m.note)+'</td></tr>';
+}).join('');
+
+/* ---------- notes with numbers ---------- */
+var tight = MODELS.filter(function(m){ return m.req_5h && m.req_5h<250; }).sort(function(a,b){ return a.req_5h-b.req_5h; });
+document.getElementById('n-5h').textContent = '$12／5 小時滾動上限。'+tight.map(function(m){ return m.name+' 約 '+grp(m.req_5h)+' 次'; }).join('、')+' 就會用完；長時間 agent 不要選它們當主力。';
+document.getElementById('n-ds').textContent = 'DeepSeek 全系列在台灣時間平日 09–12、14–18 點為尖峰，單價加倍、額度燒兩倍。V4.1 Flash 的 4× 額度優惠至 '+promoDate(ds.promo_note)+'。';
+
+drawSolve(); drawScatter(); drawLadder(); renderHead(); renderBody();
+wireTip(document.getElementById('solve').closest('.chart-card'), document.getElementById('tip3'));
+wireTip(document.getElementById('scatter').closest('.chart-card'), document.getElementById('tip1'));
+wireTip(document.getElementById('ladder').closest('.chart-card'), document.getElementById('tip2'));
+})();
+</script>
+
+</body></html>

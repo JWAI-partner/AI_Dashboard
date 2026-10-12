@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>OpenCode Go 深度研究模型選型報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#f7f6f2; --surface:#ffffff; --surface-2:#f1efe9;
+    --ink:#1c1d1f; --ink-2:#55585e; --ink-3:#8a8d93;
+    --line:#e4e2dc; --line-2:#d3d0c8;
+    --accent:#1f5fbf; --accent-soft:#e8f0fb; --accent-deep:#17457f;
+    --ok:#1f7a4d; --ok-soft:#e6f4ec;
+    --warn:#9a6206; --warn-soft:#fdf3e0;
+    --crit:#b4412b; --crit-soft:#fbece8;
+    --sans:"Noto Sans TC",system-ui,-apple-system,"Segoe UI","Microsoft JhengHei",sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.75}
+  .wrap{max-width:920px;margin:0 auto;padding:48px 18px 72px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+  h1{font-size:28px;line-height:1.3;margin:0 0 12px;font-weight:700}
+  .sub{color:var(--ink-2);font-size:14.5px;margin:0 0 8px}
+  .sub b{color:var(--ink)}
+  h2{font-size:20px;color:var(--accent-deep);border-bottom:2px solid var(--line-2);padding-bottom:8px;margin:44px 0 14px}
+  h3{font-size:16.5px;margin:0 0 8px}
+  table{width:100%;border-collapse:collapse;font-size:13.8px;margin:14px 0;background:var(--surface);box-shadow:0 1px 2px rgba(28,29,31,.05)}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--surface-2);font-weight:700;white-space:nowrap}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--accent-deep)}
+  .pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px;margin:18px 0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:0 1px 2px rgba(28,29,31,.05)}
+  .card.gold{border-top:4px solid var(--accent)}
+  .card.silver{border-top:4px solid var(--ok)}
+  .card.bronze{border-top:4px solid var(--warn)}
+  .badge{display:inline-block;font-family:var(--mono);font-size:11.5px;padding:2px 10px;border-radius:20px;margin-bottom:10px;font-weight:500}
+  .b1{background:var(--accent-soft);color:var(--accent-deep)}
+  .b2{background:var(--ok-soft);color:var(--ok)}
+  .b3{background:var(--warn-soft);color:var(--warn)}
+  .metric{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:3px 0;border-bottom:1px dashed var(--line)}
+  .metric:last-of-type{border-bottom:none}
+  .metric b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500}
+  .good{color:var(--ok);font-weight:700}
+  .warnc{color:var(--warn);font-weight:700}
+  .bad{color:var(--crit);font-weight:700}
+  .card p{font-size:13.8px;color:var(--ink-2);margin:10px 0 0}
+  ul{padding-left:22px;margin:10px 0}
+  li{margin:6px 0}
+  li::marker{color:var(--accent)}
+  .verdict{background:var(--accent-soft);border:1px solid var(--accent);border-left:5px solid var(--accent);border-radius:8px;padding:14px 18px;margin:18px 0;font-size:14.5px}
+  .foot{color:var(--ink-3);font-size:12.8px;line-height:1.65;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
+  @media (max-width:640px){
+    .wrap{padding:32px 12px 56px}
+    h1{font-size:22px}
+    table{font-size:12.8px}
+    th,td{padding:6px 7px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="eyebrow">AI Model Selection · Deep Research</p>
+<h1>OpenCode Go 深度研究模型選型報告</h1>
+<p class="sub"><b>目標場景</b>：MarginTool-Expert 式深度研究 — 精準分析 ＋ 完整報告（含眼圖、示波器截圖、datasheet 判讀）</p>
+<p class="sub"><b>方案基準</b>：OpenCode Go $10／月（首月 $5）・美元額度制 ・數據日期 2026-09-28 ・模型清單已用即時 <code>/v1/models</code> 驗證（42 個）</p>
+
+<h2>1. 方案速覽（官網）</h2>
+<table>
+<tr><th>項目</th><th>內容</th></tr>
+<tr><td>價格</td><td>首月 $5，之後 <b>$10／月</b>，單一方案，可隨時取消，可用 Zen 餘額加值續用</td></tr>
+<tr><td>計量方式</td><td><b>美元用量值</b>，非請求次數 — 便宜模型同預算可跑更多輪</td></tr>
+<tr><td>時間窗上限</td><td>5 小時 $12 ／ 每週 $30 ／ 每月 $60（全模型共用）</td></tr>
+<tr><td>單模型月配額</td><td>旗艦約 $15／月（GLM-5.3、Kimi K3、Qwen3.8 Max、Grok 等）；標準開放模型約 $60／月；DeepSeek V4 Flash 約 $30／月</td></tr>
+<tr><td>用完不斷線</td><td>可切免費模型（<code>space-bunny-free</code> 等）或開 Use balance 續用</td></tr>
+<tr><td>已知地雷</td><td>DeepSeek 全系列台灣時間平日 09–12、14–18 為尖峰，單價 ×2；$12／5hr 窗是長時間 agent 最容易卡的地方</td></tr>
+</table>
+
+<h2>2. 深度研究 vs 寫碼：選型標準不同</h2>
+<p>前一份《OpenCode Go 選型指南》是為 <b>coding agent</b> 算的 Pareto 前緣（Terminal-Bench 4.0 × 每成功成本）。深度研究任務必須換權重：</p>
+<table>
+<tr><th>標準</th><th>寫碼 agent</th><th>深度研究（本報告）</th></tr>
+<tr><td>核心能力指標</td><td>Terminal-Bench 4.0</td><td><b>HLE（Humanity's Last Exam）＋ AA 智能指數</b> — 考跨領域知識與推理，更接近研究任務</td></tr>
+<tr><td>讀圖能力</td><td>加分</td><td><b>必需</b> — 眼圖、示波器截圖、spec 曲線圖都要能直接判讀</td></tr>
+<tr><td>速度</td><td>重要（互動）</td><td><b>不重要</b> — 研究是 background 任務，慢 1 分鐘換準 5% 划算</td></tr>
+<tr><td>資料保留</td><td>看情況</td><td><b>0 天保留優先</b> — PCB／伺服器機密資料不能進訓練集</td></tr>
+<tr><td>Context</td><td>越大越好</td><td>1M 等級必需 — datasheet ＋ 論文 ＋ 量測報告一次塞入</td></tr>
+</table>
+
+<h2>3. 首選三模型</h2>
+<div class="pick">
+
+<div class="card gold">
+<div class="badge b1">🥇 主力・機密可</div>
+<h3>MiMo-V2.6-Pro</h3>
+<p style="margin:0 0 10px"><code>opencode-go/mimo-v2.6-pro</code></p>
+<div class="metric"><span>AA 智能</span><b class="good">46.3（T0）</b></div>
+<div class="metric"><span>HLE</span><b class="good">49.4%（贏 Muse 1.3）</b></div>
+<div class="metric"><span>TB 4.0</span><b class="good">34.8%（贏 Muse 1.3）</b></div>
+<div class="metric"><span>每成功任務</span><b>$0.35</b></div>
+<div class="metric"><span>讀圖／Context</span><b class="good">可讀圖／1.05M</b></div>
+<div class="metric"><span>資料保留</span><b class="good">0 天，不訓練</b></div>
+<div class="metric"><span>額度</span><b>543 次／天・約 92 重度／月</b></div>
+<div class="metric"><span>速度</span><b class="warnc">47 tok/s・首字 46s（慢）</b></div>
+<p>唯一「困難任務贏 Muse、又不碰你資料」的模型。慢是缺點，但深度研究丟 background 等即可，精準度優先。</p>
+</div>
+
+<div class="card silver">
+<div class="badge b2">🥈 量大・便宜聰明</div>
+<h3>GLM-5.3-Flash</h3>
+<p style="margin:0 0 10px"><code>opencode-go/glm-5.3-flash</code></p>
+<div class="metric"><span>AA 智能</span><b class="good">41.8（T1）</b></div>
+<div class="metric"><span>TB 4.0</span><b class="good">32.8%（接近頂級）</b></div>
+<div class="metric"><span>每成功任務</span><b>$0.71</b></div>
+<div class="metric"><span>讀圖／Context</span><b class="good">可讀圖／1M</b></div>
+<div class="metric"><span>資料保留</span><b class="good">0 天，不訓練</b></div>
+<div class="metric"><span>額度</span><b class="good">1,053 次／天・約 201 重度／月・寬 6×</b></div>
+<div class="metric"><span>OC 留存率</span><b>69.3%</b></div>
+<p>研究量大時的主力：能力只比第一名低一檔，月重度量是 MiMo 的 2 倍、日額度近 2 倍，$10 方案裡最耐操的聰明模型。</p>
+</div>
+
+<div class="card bronze">
+<div class="badge b3">🥉 極限智能・僅非機密</div>
+<h3>Muse Spark 1.3 Contributor</h3>
+<p style="margin:0 0 10px"><code>opencode-go/muse-spark-1.3-contributor</code></p>
+<div class="metric"><span>AA 智能</span><b class="good">48.1（Go 第一）</b></div>
+<div class="metric"><span>TB 4.0</span><b>33.3%</b></div>
+<div class="metric"><span>每成功任務</span><b class="good">$0.13（全表最低之二）</b></div>
+<div class="metric"><span>讀圖／Context</span><b class="good">可讀圖／1.05M・207 tok/s</b></div>
+<div class="metric"><span>資料保留</span><b class="bad">用於訓練 Meta 模型 ⚠️</b></div>
+<div class="metric"><span>額度</span><b class="good">7,553 次／天・約 982 重度／月</b></div>
+<p>最聰明 ＋ 最便宜 ＋ 額度海量，但 prompt 會被拿去訓練。<b>只用在公開主題</b>（公開論文、市場調查）；公司程式碼／量測數據一律不用它。</p>
+</div>
+
+</div>
+
+<div class="verdict">
+<b>一句話決策：</b>機密研究 → <code>mimo-v2.6-pro</code>（難題）＋ <code>glm-5.3-flash</code>（量大）；公開主題 → <code>muse-spark-1.3-contributor</code> 一把梭。機密＋要秒回 → <code>deepseek-v4.1-flash</code>（首字 10s、0 天保留、OC 留存 #1）。
+</div>
+
+<h2>4. 三模型對照表</h2>
+<table>
+<tr><th>模型</th><th>智能</th><th>HLE／TB 4.0</th><th>每成功 $</th><th>次／天</th><th>重度／月</th><th>讀圖</th><th>Context</th><th>資料</th><th>定位</th></tr>
+<tr><td><b>MiMo-V2.6-Pro</b></td><td>46.3</td><td class="good">49.4% / 34.8%</td><td>$0.35</td><td>543</td><td>92</td><td class="good">✓</td><td>1.05M</td><td class="good">0 天</td><td>機密難題主力</td></tr>
+<tr><td><b>GLM-5.3-Flash</b></td><td>41.8</td><td>— / 32.8%</td><td>$0.71</td><td>1,053</td><td>201</td><td class="good">✓</td><td>1M</td><td class="good">0 天</td><td>量大耐操</td></tr>
+<tr><td><b>Muse Spark 1.3</b></td><td class="good">48.1</td><td>48.7% / 33.3%</td><td class="good">$0.13</td><td class="good">7,553</td><td class="good">982</td><td class="good">✓</td><td>1.05M</td><td class="bad">訓練用 ⚠️</td><td>公開主題一把梭</td></tr>
+<tr><td>DeepSeek V4.1 Flash（備）</td><td>39.5</td><td>— / 26.8%</td><td>$0.36</td><td>1,083</td><td>104*</td><td class="good">✓</td><td>1M</td><td class="good">0 天</td><td>機密＋要快</td></tr>
+<tr><td>GLM-5.3（不選）</td><td>44.8</td><td>— / 41.9%</td><td class="bad">$4.80</td><td>36</td><td>7</td><td class="bad">純文字</td><td>1M</td><td class="good">0 天</td><td>最後一招，非日常</td></tr>
+</table>
+<p class="sub">* DeepSeek V4.1 Flash 的 4× 額度優惠至 9/27，之後約 104 重度／月。Qwen3.8 Max（智能 45.4／TB 38.9%）看似強，但每成功 $11.2、日僅 27 次，CP 值出局。Grok／Kimi K3 系列智能高但單次成本 $3–6，且無 HLE 優勢，同樣出局。</p>
+
+<h2>5. 額度實戰試算（$10／月）</h2>
+<table>
+<tr><th>用法</th><th>推薦配置</th><th>月產能估算</th></tr>
+<tr><td>每週 2 份機密深度報告</td><td>MiMo-V2.6-Pro 主力</td><td>約 8–10 份／月 ＜ 92 重度配額，綽綽有餘</td></tr>
+<tr><td>每天掃論文 ＋ datasheet（量大）</td><td>GLM-5.3-Flash</td><td>1,053 次／天，連續爬梳不斷線</td></tr>
+<tr><td>公開主題快速研究</td><td>Muse Spark 1.3</td><td>7,553 次／天，實質用不完；<code>-free</code> 版本（能力相同）可當溢出退路</td></tr>
+<tr><td>注意 5hr 窗</td><td colspan="2">$12／5hr 滾動上限 — 長時間連續 agent 排程要錯開，避免三模型同時全速燒同一窗</td></tr>
+</table>
+
+<h2>6. Hermes 設定建議</h2>
+<ul>
+<li>MarginTool-Expert（機密）：<code>hermes config set model.provider opencode-go</code> ＋ <code>hermes config set model.default mimo-v2.6-pro</code>；量大批次改 <code>glm-5.3-flash</code></li>
+<li>公開研究 profile：<code>model.default muse-spark-1.3-contributor</code></li>
+<li>改指定 profile 的設定要加 <code>HERMES_HOME=.../profiles/&lt;name&gt;</code> 前綴（直接跑 <code>hermes config set</code> 只會改到 default profile），改完用 <code>hermes profile list</code> 驗證 Model 欄</li>
+</ul>
+
+<h2>7. 資料來源與方法學</h2>
+<div class="foot">
+<b>來源</b>：(1) OpenCode 官網 Go 文件與訂閱頁（$10／月、$12／5hr、$30／週、$60／月、單模型配額規則）；(2) 前作《OpenCode Go 選型指南》之 AA 智能指數、Terminal-Bench 4.0、HLE、每成功任務成本、次／天、資料條款數據；(3) 本機即時 <code>/v1/models</code> 快取（42 個 model id 存在性驗證）。<br>
+<b>方法學</b>：每成功成本 ＝ AA 實測每任務 token 用量 × Go 單價（快取命中率 94.2%，取 OpenCode 實測中位數）÷ 答對率；一般任務以 AA 智能指數、困難任務以 Terminal-Bench 4.0 作為成功率。<br>
+<b>限制</b>：成本數字為引用前作方法學之推算值，非本站獨立實測；第三方整理（bitdoze、llmgateway）僅用於方案規則交叉確認。所有免費模型皆標註「限時」，實際以 OpenCode Zen 價格表為準。<br>
+<b>揭露</b>：本報告由 AI 生成，僅供參考。
+</div>
+
+</div>
+</body>
+</html>
