@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Agent v0.21.1 預設 Skill 完整盤點報告</title>
+<style>
+:root{
+  --bg: var(--card, #ffffff);
+  --fg: var(--foreground, #1a1a2e);
+  --muted: var(--muted-foreground, #64748b);
+  --acc: var(--accent, #6366f1);
+  --bd: var(--border, #e2e8f0);
+}
+*{box-sizing:border-box}
+body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;color:var(--fg);line-height:1.75;margin:0;padding:28px;max-width:1180px}
+h1{font-size:30px;margin:0 0 4px;letter-spacing:.5px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:18px}
+.badge{display:inline-block;font-size:12px;border:1px solid var(--bd);border-radius:999px;padding:2px 12px;margin:2px 4px 2px 0;background:color-mix(in srgb, var(--acc) 8%, transparent)}
+.badge b{color:var(--acc)}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0}
+.stat{border:1px solid var(--bd);border-radius:14px;padding:16px 18px;background:color-mix(in srgb, var(--acc) 5%, transparent)}
+.stat .n{font-size:34px;font-weight:800;line-height:1}
+.stat .l{font-size:13px;color:var(--muted);margin-top:4px}
+h2{font-size:21px;margin:38px 0 10px;padding-left:12px;border-left:5px solid var(--acc)}
+h3{font-size:16px;margin:22px 0 8px}
+p,li{font-size:14.5px}
+.card{border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin:12px 0}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:820px){.cols2{grid-template-columns:1fr}body{padding:14px}}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+th,td{border:1px solid var(--bd);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:color-mix(in srgb, var(--acc) 10%, transparent);font-size:13px;white-space:nowrap}
+tr:nth-child(even) td{background:color-mix(in srgb, var(--acc) 3%, transparent)}
+code{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:color-mix(in srgb, var(--acc) 8%, transparent);padding:1px 7px;border-radius:6px;border:1px solid var(--bd)}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:14px 0}
+.step{flex:1;min-width:150px;border:2px solid var(--acc);border-radius:12px;padding:12px;text-align:center;font-size:13px;background:color-mix(in srgb, var(--acc) 6%, transparent)}
+.step b{display:block;font-size:14px;margin-bottom:4px}
+.arrow{align-self:center;padding:0 8px;font-size:22px;color:var(--acc);font-weight:800}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:6px 12px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+.bar-row{display:grid;grid-template-columns:190px 1fr 44px;gap:10px;align-items:center;font-size:13px;margin:5px 0}
+.bar{height:14px;border-radius:7px;background:color-mix(in srgb, var(--acc) 14%, transparent);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,#6366f1,#22d3ee)}
+.tag{font-size:11.5px;border-radius:6px;padding:1px 8px;border:1px solid var(--bd);white-space:nowrap}
+.warn{border-left:4px solid #f59e0b;background:color-mix(in srgb, #f59e0b 8%, transparent);padding:10px 14px;border-radius:0 10px 10px 0;font-size:13.5px}
+.tip{border-left:4px solid #22c55e;background:color-mix(in srgb, #22c55e 8%, transparent);padding:10px 14px;border-radius:0 10px 10px 0;font-size:13.5px}
+svg text{font-family:inherit}
+.toc{columns:2;font-size:13.5px}
+.toc li{margin:2px 0}
+footer{color:var(--muted);font-size:12.5px;margin-top:36px;border-top:1px dashed var(--bd);padding-top:12px}
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;margin:10px 0}
+.skill{border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:13px}
+.skill b.en{font-size:13.5px}
+.skill .zh{font-weight:700;color:var(--acc)}
+.decision{border:1px solid var(--bd);border-radius:12px;padding:12px 16px;margin:8px 0;font-size:13.5px}
+.decision q{font-weight:700}
+</style>
+</head>
+<body>
+
+<h1>🤖 Hermes Agent 預設 Skill 完整盤點</h1>
+<div class="sub">版本 <b>v0.21.1</b>（2026-09-07 build）・ 盤點時間 2026-09-16 ・ 資料來源：本機實測 <code>hermes skills list</code> + <code>SKILL.md</code> 落盤掃描</div>
+<div>
+<span class="badge"><b>58</b> 已啟用</span>
+<span class="badge"><b>53</b> builtin + <b>5</b> local</span>
+<span class="badge"><b>65</b> 落盤（含 7 未啟用）</span>
+<span class="badge"><b>12</b> 分類（啟用 10 + 限定 2）</span>
+<span class="badge">0 停用 ・ 0 hub</span>
+</div>
+
+<h2>0. 閱讀指南</h2>
+<div class="card">
+<ol class="toc">
+<li><a href="#s1">§1 總覽儀表板：數量分佈圖</a></li>
+<li><a href="#s2">§2 Skill 是什麼：運作原理與載入流程圖</a></li>
+<li><a href="#s3">§3 分類架構示意圖</a></li>
+<li><a href="#s4">§4 逐分類詳解（58 個啟用）</a></li>
+<li><a href="#s5">§5 任務 → Skill 決策流程圖</a></li>
+<li><a href="#s6">§6 黃金組合：4 條實戰 workflow</a></li>
+<li><a href="#s7">§7 管理指令速查</a></li>
+<li><a href="#s8">§8 未啟用 7 個：平台限定說明</a></li>
+<li><a href="#s9">§9 附錄：65 列完整清單</a></li>
+</ol>
+<p style="color:var(--muted)">Skill = 「觸發條件 + 標準作業流程 + 指定工具」的封裝。模型在對話開始時只看到 <code>name + description</code>（約 58 行），命中才用 <code>skill_view()</code> 載入全文。這就是為什麼 skill 描述寫得越準，觸發越穩。</p>
+</div>
+
+<h2 id="s1">1. 總覽儀表板</h2>
+<div class="grid4">
+<div class="stat"><div class="n">58</div><div class="l">已啟用 skills<br>53 builtin（官方內建）+ 5 local（本機自訂/修改）</div></div>
+<div class="stat"><div class="n">16</div><div class="l">最大分類：productivity<br>佔 27.6%，文件辦公全家桶</div></div>
+<div class="stat"><div class="n">11 + 11</div><div class="l">creative / software-development<br>並列第二，各佔 19%</div></div>
+<div class="stat"><div class="n">7</div><div class="l">落盤但未啟用<br>apple×4（macOS 限定）+ 3 通用可選</div></div>
+</div>
+
+<div class="cols2">
+<div class="card">
+<h3>📊 各分類數量長條圖（啟用 58）</h3>
+<div class="bar-row"><span>productivity 生產力</span><div class="bar"><i style="width:100%"></i></div><b>16</b></div>
+<div class="bar-row"><span>creative 創意視覺</span><div class="bar"><i style="width:69%"></i></div><b>11</b></div>
+<div class="bar-row"><span>software-dev 軟體開發</span><div class="bar"><i style="width:69%"></i></div><b>11</b></div>
+<div class="bar-row"><span>autonomous 代理編排</span><div class="bar"><i style="width:38%"></i></div><b>6</b></div>
+<div class="bar-row"><span>research 研究檢索</span><div class="bar"><i style="width:38%"></i></div><b>6</b></div>
+<div class="bar-row"><span>media 影音</span><div class="bar"><i style="width:19%"></i></div><b>3</b></div>
+<div class="bar-row"><span>email 郵件</span><div class="bar"><i style="width:13%"></i></div><b>2</b></div>
+<div class="bar-row"><span>note-taking 筆記</span><div class="bar"><i style="width:7%"></i></div><b>1</b></div>
+<div class="bar-row"><span>social-media 社群</span><div class="bar"><i style="width:7%"></i></div><b>1</b></div>
+<div class="bar-row"><span>web 網頁救援</span><div class="bar"><i style="width:7%"></i></div><b>1</b></div>
+</div>
+<div class="card">
+<h3>🍩 結構比例示意（SVG）</h3>
+<svg viewBox="0 0 320 200" width="100%" role="img" aria-label="donut">
+<circle cx="110" cy="100" r="70" fill="none" stroke="#e2e8f0" stroke-width="28"/>
+<circle cx="110" cy="100" r="70" fill="none" stroke="#6366f1" stroke-width="28" stroke-dasharray="121 440" stroke-dashoffset="110" stroke-linecap="butt" transform="rotate(-90 110 100)"/>
+<circle cx="110" cy="100" r="70" fill="none" stroke="#22d3ee" stroke-width="28" stroke-dasharray="84 440" stroke-dashoffset="-11" transform="rotate(-90 110 100)"/>
+<circle cx="110" cy="100" r="70" fill="none" stroke="#f59e0b" stroke-width="28" stroke-dasharray="84 440" stroke-dashoffset="-95" transform="rotate(-90 110 100)"/>
+<circle cx="110" cy="100" r="70" fill="none" stroke="#22c55e" stroke-width="28" stroke-dasharray="151 440" stroke-dashoffset="-179" transform="rotate(-90 110 100)"/>
+<text x="110" y="96" text-anchor="middle" font-size="24" font-weight="800" fill="var(--fg)">58</text>
+<text x="110" y="116" text-anchor="middle" font-size="11" fill="var(--muted)">已啟用</text>
+<g font-size="11" fill="var(--fg)">
+<circle cx="205" cy="40" r="6" fill="#6366f1"/><text x="218" y="44">辦公 16（28%）</text>
+<circle cx="205" cy="62" r="6" fill="#22d3ee"/><text x="218" y="66">創意 11（19%）</text>
+<circle cx="205" cy="84" r="6" fill="#f59e0b"/><text x="218" y="88">開發 11（19%）</text>
+<circle cx="205" cy="106" r="6" fill="#22c55e"/><text x="218" y="110">其餘 20（34%）</text>
+<circle cx="205" cy="128" r="6" fill="#e2e8f0"/><text x="218" y="132">未啟用 7（另計）</text>
+</g>
+</svg>
+<p style="font-size:13px;color:var(--muted)">解讀：Hermes 預設是「辦公 + 出圖 + 寫碼」三足鼎立。research / agent 編排是第二層，email / media / web 是長尾彈藥。</p>
+</div>
+</div>
+
+<h2 id="s2">2. Skill 是什麼？運作原理</h2>
+<div class="card">
+<h3>⚙️ 一次 Skill 觸發的 5 步流程</h3>
+<div class="flow">
+<div class="step"><b>① 使用者提問</b>「幫我把這份會議錄音整理成待辦」</div><div class="arrow">→</div>
+<div class="step"><b>② 模型比對描述</b>掃描 58 個 description，命中 <code>meeting-action-items</code></div><div class="arrow">→</div>
+<div class="step"><b>③ 載入全文</b><code>skill_view(name)</code> 讀 SKILL.md + references/</div><div class="arrow">→</div>
+<div class="step"><b>④ 執行指定工具</b>照 SOP 調 terminal / API / scripts</div><div class="arrow">→</div>
+<div class="step"><b>⑤ 交付產物</b>待辦清單 + 引用 + 後續建議</div>
+</div>
+<svg viewBox="0 0 900 170" width="100%" role="img" aria-label="skill layers">
+<g font-size="12">
+<rect x="10" y="10" width="280" height="150" rx="12" fill="none" stroke="#6366f1" stroke-width="2"/>
+<text x="24" y="36" font-weight="700" fill="#6366f1">Layer 1：常駐（每次對話都載入）</text>
+<text x="24" y="60" fill="var(--fg)">58 個 name + 一句 description</text>
+<text x="24" y="82" fill="var(--muted)">≈ 60 行 token，極輕量</text>
+<text x="24" y="104" fill="var(--muted)">決定「何時觸發誰」</text>
+<rect x="310" y="10" width="280" height="150" rx="12" fill="none" stroke="#22d3ee" stroke-width="2"/>
+<text x="324" y="36" font-weight="700" fill="#0891b2">Layer 2：按需（命中才載入）</text>
+<text x="324" y="60" fill="var(--fg)">SKILL.md 全文 + SOP</text>
+<text x="324" y="82" fill="var(--muted)">references / scripts / templates</text>
+<text x="324" y="104" fill="var(--muted)">決定「怎麼做才對」</text>
+<rect x="610" y="10" width="280" height="150" rx="12" fill="none" stroke="#22c55e" stroke-width="2"/>
+<text x="624" y="36" font-weight="700" fill="#16a34a">Layer 3：執行（工具層）</text>
+<text x="624" y="60" fill="var(--fg)">terminal / browser / API</text>
+<text x="624" y="82" fill="var(--muted)">gh・gws・ntn・lms・ffmpeg…</text>
+<text x="624" y="104" fill="var(--muted)">決定「產出能不能用」</text>
+</g>
+</svg>
+<div class="tip">💡 實用含義：你不需要背指令，只要用自然語言說出任務（「幫我查 arXiv」「幫我做一份 PPT」），模型會自己選 skill。說得越像任務，命中率越高。</div>
+</div>
+
+<h2 id="s3">3. 分類架構示意圖</h2>
+<div class="card">
+<svg viewBox="0 0 900 340" width="100%" role="img" aria-label="category tree">
+<g font-size="12.5" text-anchor="middle">
+<rect x="350" y="8" width="200" height="44" rx="10" fill="#6366f1"/><text x="450" y="30" fill="#fff" font-weight="800">Hermes Agent v0.21.1</text><text x="450" y="46" fill="#e0e7ff" font-size="11">58 skills · 10 啟用分類</text>
+<g>
+<rect x="10" y="80" width="160" height="52" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="90" y="101" font-weight="700" fill="var(--fg)">🤖 代理編排 ×6</text><text x="90" y="118" font-size="11" fill="var(--muted)">claude / codex / opencode</text>
+<rect x="180" y="80" width="160" height="52" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="260" y="101" font-weight="700" fill="var(--fg)">🎨 創意視覺 ×11</text><text x="260" y="118" font-size="11" fill="var(--muted)">出圖・影片・網頁</text>
+<rect x="350" y="80" width="160" height="52" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="430" y="101" font-weight="700" fill="var(--fg)">📄 生產力 ×16</text><text x="430" y="118" font-size="11" fill="var(--muted)">文件・郵件・行事曆</text>
+<rect x="520" y="80" width="160" height="52" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="600" y="101" font-weight="700" fill="var(--fg)">💻 軟體開發 ×11</text><text x="600" y="118" font-size="11" fill="var(--muted)">除錯・審查・TDD</text>
+<rect x="690" y="80" width="160" height="52" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="770" y="101" font-weight="700" fill="var(--fg)">🔍 研究 ×6</text><text x="770" y="118" font-size="11" fill="var(--muted)">論文・引用・輿情</text>
+<rect x="10" y="150" width="160" height="52" rx="9" fill="none" stroke="#94a3b8" stroke-width="1.4"/><text x="90" y="171" font-weight="700" fill="var(--fg)">🎬 影音 ×3</text><text x="90" y="188" font-size="11" fill="var(--muted)">YT・GIF・頻譜</text>
+<rect x="180" y="150" width="160" height="52" rx="9" fill="none" stroke="#94a3b8" stroke-width="1.4"/><text x="260" y="171" font-weight="700" fill="var(--fg)">✉️ 郵件 ×2</text><text x="260" y="188" font-size="11" fill="var(--muted)">triage・himalaya</text>
+<rect x="350" y="150" width="160" height="52" rx="9" fill="none" stroke="#94a3b8" stroke-width="1.4"/><text x="430" y="171" font-weight="700" fill="var(--fg)">📝 筆記 ×1</text><text x="430" y="188" font-size="11" fill="var(--muted)">obsidian</text>
+<rect x="520" y="150" width="160" height="52" rx="9" fill="none" stroke="#94a3b8" stroke-width="1.4"/><text x="600" y="171" font-weight="700" fill="var(--fg)">💬 社群 ×1</text><text x="600" y="188" font-size="11" fill="var(--muted)">reddit</text>
+<rect x="690" y="150" width="160" height="52" rx="9" fill="none" stroke="#94a3b8" stroke-width="1.4"/><text x="770" y="171" font-weight="700" fill="var(--fg)">🌐 網頁救援 ×1</text><text x="770" y="188" font-size="11" fill="var(--muted)">403/ paywall</text>
+</g>
+<g stroke="#c7d2fe" stroke-width="1.5">
+<line x1="450" y1="52" x2="90" y2="80"/><line x1="450" y1="52" x2="260" y2="80"/><line x1="450" y1="52" x2="430" y2="80"/><line x1="450" y1="52" x2="600" y2="80"/><line x1="450" y1="52" x2="770" y2="80"/>
+</g>
+<rect x="10" y="225" width="880" height="100" rx="10" fill="none" stroke="#f59e0b" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="450" y="248" font-weight="700" fill="#b45309">落盤但本機未啟用（7）・按需 opt-in</text>
+<text x="450" y="270" font-size="12" fill="var(--fg)">🍎 apple ×4（Notes / Reminders / FindMy / iMessage，macOS 限定）・ 🛠 sdlc-review（Kanban 覆核）・ 🐍 python-debugpy ・ 𝕏 xurl（X/Twitter CLI）</text>
+<text x="450" y="292" font-size="11" fill="var(--muted)">Windows 本機用不到 apple 系；需要時 hermes skills opt-in / install 即可</text>
+</g>
+</svg>
+</div>
+
+<h2 id="s4">4. 逐分類詳解</h2>
+
+<h3>🤖 autonomous-ai-agents（6）— 多代理編排 + Hermes 本體 + 排錯</h3>
+<table><tr><th>Skill</th><th>中文功能</th><th>何時觸發 / 關鍵字</th><th>背後工具</th></tr>
+<tr><td><code>claude-code</code></td><td><b>委派寫碼給 Claude Code</b>：開功能、修 PR</td><td>「用 claude code 做…」「開個 PR」</td><td>Claude Code CLI</td></tr>
+<tr><td><code>codex</code></td><td><b>委派給 OpenAI Codex</b></td><td>「用 codex 寫…」</td><td>Codex CLI</td></tr>
+<tr><td><code>opencode</code></td><td><b>委派給 OpenCode</b>（功能 / PR review）</td><td>「用 opencode…」</td><td>OpenCode CLI</td></tr>
+<tr><td><code>computer-use</code></td><td><b>桌面自動操作</b>，background-first；有訊號才升級</td><td>「幫我操作桌面…」「點開…」</td><td>cua-driver 螢幕+滑鼠</td></tr>
+<tr><td><code>hermes-agent</code> ⭐</td><td><b>Hermes 本體手冊</b>：設定、主題、plugin、webhook、排障</td><td>「hermes 怎麼設定…」「改 model…」</td><td>config / profile / docs</td></tr>
+<tr><td><code>llm-provider-troubleshooting</code> <span class="tag">local</span></td><td><b>模型/供應商排錯</b>：400/413、reasoning、切換失敗</td><td>報錯、換模型、rate limit</td><td>探針腳本 groq_tpm_probe</td></tr>
+</table>
+
+<h3>🎨 creative（11）— 出圖、影片、網頁、音樂</h3>
+<div class="skill-grid">
+<div class="skill"><b class="en">architecture-diagram</b><br><span class="zh">深色架構圖</span><br>雲端/Infra SVG 轉 HTML。說「畫架構圖」即觸發。</div>
+<div class="skill"><b class="en">ascii-video</b><br><span class="zh">ASCII 影片</span><br>影片/音訊轉彩色 ASCII MP4/GIF。</div>
+<div class="skill"><b class="en">baoyu-infographic</b><br><span class="zh">資訊圖表</span><br>21 版式 × 21 風格，中文資訊圖首選。</div>
+<div class="skill"><b class="en">claude-design</b><br><span class="zh">一次性設計產物</span><br>Landing / Deck / Prototype HTML。</div>
+<div class="skill"><b class="en">design-md</b><br><span class="zh">DESIGN.md 權杖規格</span><br>撰寫/驗證/匯出 Google 設計 token。</div>
+<div class="skill"><b class="en">hermes-chart-delivery</b> <span class="tag">local</span><br><span class="zh">Hermes 圖表交付規範</span><br>什麼時候用 MEDIA PNG、什麼時候用 ::preview HTML。本次報告即依此規範。</div>
+<div class="skill"><b class="en">humanizer</b><br><span class="zh">去 AI 味</span><br>刪罐頭語、加真人口氣。</div>
+<div class="skill"><b class="en">manim-video</b><br><span class="zh">數學動畫</span><br>Manim CE，3Blue1Brown 風格。</div>
+<div class="skill"><b class="en">p5js</b><br><span class="zh">生成藝術</span><br>p5.js：gen-art / shader / 互動 / 3D。</div>
+<div class="skill"><b class="en">popular-web-designs</b><br><span class="zh">54 套真實設計復刻</span><br>Stripe / Linear / Vercel 風 HTML/CSS。</div>
+<div class="skill"><b class="en">songwriting-and-ai-music</b><br><span class="zh">作詞 + Suno prompt</span><br>詞曲工藝 + AI 音樂提示詞。</div>
+</div>
+
+<h3>📄 productivity（16）— 最大宗，辦公全家桶</h3>
+<table><tr><th>Skill</th><th>中文功能</th><th>一句話場景</th></tr>
+<tr><td><code>docx</code> / <code>xlsx</code> / <code>powerpoint</code> / <code>pdf</code></td><td><b>Office 四件套</b>：Word / Excel / PPT / PDF 建立、讀取、編輯、合併、OCR</td><td>「幫我生一份報價單 docx」「把這堆 CSV 整理成 xlsx」「做一份簡報」</td></tr>
+<tr><td><code>notion</code> / <code>airtable</code> / <code>box</code> / <code>google-workspace</code></td><td><b>雲端協作</b>：Notion 頁面/資料庫、Airtable CRUD、Box 檔案、Gmail/Calendar/Drive/Docs/Sheets</td><td>「同步到 Notion」「查我的行事曆」「Drive 找檔案」</td></tr>
+<tr><td><code>maps</code></td><td><b>地圖</b>：geocode、POI、路線、時區（OSM/OSRM）</td><td>「這地址在哪」「規劃路線」</td></tr>
+<tr><td><code>meeting-action-items</code> / <code>document-to-action-items</code></td><td><b>會議/文件 → 待辦</b>：決議、負責人、期限，附引用</td><td>「把會議記錄轉成待辦」</td></tr>
+<tr><td><code>teams-meeting-pipeline</code></td><td><b>Teams 會議管線</b>：摘要、job replay、Graph 訂閱</td><td>Teams 錄音/逐字稿後處理</td></tr>
+<tr><td><code>weekly-review-planning</code></td><td><b>週覆盤</b>：承諾、卡住的事、下週計畫</td><td>「幫我做每週回顧」</td></tr>
+<tr><td><code>product-price-monitor</code></td><td><b>價格監控</b>：商品/機票/物件，到價告警</td><td>「幫我盯這張機票」</td></tr>
+<tr><td><code>technical-reporting</code> <span class="tag">local</span></td><td><b>技術報告</b>：含數學公式渲染的 PDF</td><td>SI 報告、含 LaTeX 公式的 PDF（你的本行）</td></tr>
+<tr><td><code>llm-model-selection</code> <span class="tag">local</span></td><td><b>選模型</b>：跨供應商挑聊天模型</td><td>「哪個模型適合…」</td></tr>
+</table>
+
+<h3>💻 software-development（11）— 寫碼、除錯、審查</h3>
+<table><tr><th>Skill</th><th>中文功能</th><th>觸發時機</th></tr>
+<tr><td><code>systematic-debugging</code></td><td><b>四階段根因除錯</b>：先理解再修</td><td>任何「壞了」「為什麼不行」</td></tr>
+<tr><td><code>test-driven-development</code></td><td><b>TDD</b>：RED-GREEN-REFACTOR，先寫測試</td><td>「用 TDD 做…」</td></tr>
+<tr><td><code>requesting-code-review</code></td><td><b>提交前審查</b>：安全掃描、品質閘、自動修</td><td>commit / PR 前</td></tr>
+<tr><td><code>simplify-code</code></td><td><b>四代理平行清理</b>近期改動</td><td>重構、清技術債</td></tr>
+<tr><td><code>spike</code></td><td><b>拋棄式實驗</b>：先驗證想法再正式做</td><td>「先試試看可不可行」</td></tr>
+<tr><td><code>github</code></td><td><b>GitHub</b>：PR / issue / review / repo / auth</td><td>任何 GitHub 操作（gh CLI）</td></tr>
+<tr><td><code>codebase-inspection</code></td><td><b>程式庫體檢</b>：LOC、語言、比例（pygount）</td><td>「這專案多大」「什麼語言為主」</td></tr>
+<tr><td><code>dogfood</code></td><td><b>探索式 QA</b>：找 bug、附證據、寫報告</td><td>「幫我測這個網站」</td></tr>
+<tr><td><code>node-inspect-debugger</code></td><td><b>Node 除錯</b>：--inspect + CDP</td><td>Node 卡住、記憶體洩漏</td></tr>
+<tr><td><code>inspecting-hermes-desktop-dom</code></td><td><b>Hermes 桌面 DOM 檢視</b>（CDP 讀 live DOM/CSS）</td><td>調桌面 App 樣式/版面</td></tr>
+<tr><td><code>hermes-agent-skill-authoring</code></td><td><b>寫 Skill</b>：SKILL.md 前言與結構規範</td><td>「幫我做一個 skill」</td></tr>
+</table>
+
+<h3>🔍 research（6）+ ✉️ email（2）+ 🎬 media（3）+ 📝💬🌐（各 1）</h3>
+<table><tr><th>Skill</th><th>中文功能</th><th>場景</th></tr>
+<tr><td><code>arxiv</code></td><td><b>arXiv 論文檢索</b>（關鍵字/作者/分類/ID）</td><td>找 paper、追最新研究</td></tr>
+<tr><td><code>grounded-citations</code></td><td><b>有據引用</b>：答案掛可驗證來源</td><td>寫報告、避免幻覺</td></tr>
+<tr><td><code>competitor-news-monitor</code></td><td><b>競品新聞監控</b>：具名公司重大消息摘要</td><td>盯對手動態</td></tr>
+<tr><td><code>rss-feeds</code></td><td><b>RSS/Atom/JSON</b> 訂閱與解析</td><td>訂閱部落格、監控更新</td></tr>
+<tr><td><code>llm-wiki</code></td><td><b>LLM Wiki 知識庫</b>（Karpathy 流）：互聯 markdown</td><td>建個人 AI 知識庫</td></tr>
+<tr><td><code>local-ai-model-fit</code> <span class="tag">local</span></td><td><b>本機模型適配</b>：這台機器跑得動什麼模型</td><td>GTX 1060 / Ollama / LM Studio 選型</td></tr>
+<tr><td><code>email-inbox-triage</code> / <code>himalaya</code></td><td><b>信箱分流</b>（排優先+草稿回信）/ <b>IMAP/SMTP 終端收發</b></td><td>「信箱太多，幫我分」「用終端寄信」</td></tr>
+<tr><td><code>youtube-content</code> / <code>gif-search</code> / <code>songsee</code></td><td><b>YT 逐字稿→摘要/貼文</b> / <b>Tenor GIF 搜尋</b> / <b>音訊頻譜特徵</b>（mel/chroma/MFCC）</td><td>影片整理、找 GIF、音訊分析</td></tr>
+<tr><td><code>obsidian</code></td><td><b>Obsidian vault</b> 讀寫搜尋編輯</td><td>筆記庫操作</td></tr>
+<tr><td><code>reddit-reading</code></td><td><b>讀 Reddit</b>：版、搜尋、串、使用者，免瀏覽器</td><td>輿情、找討論串</td></tr>
+<tr><td><code>blocked-page-recovery</code></td><td><b>被擋頁面救援</b>：403/429、paywall、WAF、bot 牆</td><td>抓不到的網頁換招抓</td></tr>
+</table>
+
+<h2 id="s5">5. 任務 → Skill 決策流程圖</h2>
+<div class="card">
+<svg viewBox="0 0 900 330" width="100%" role="img">
+<g font-size="12.5" text-anchor="middle">
+<rect x="330" y="6" width="240" height="42" rx="21" fill="#6366f1"/><text x="450" y="32" fill="#fff" font-weight="800">💬 我有一個任務</text>
+<rect x="80" y="70" width="180" height="46" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="170" y="89" font-weight="700" fill="var(--fg)">寫程式 / 修 bug？</text><text x="170" y="106" font-size="11" fill="var(--muted)">→ §4 軟體開發 11</text>
+<rect x="280" y="70" width="180" height="46" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="370" y="89" font-weight="700" fill="var(--fg)">做文件 / 簡報 / 表格？</text><text x="370" y="106" font-size="11" fill="var(--muted)">→ productivity 16</text>
+<rect x="480" y="70" width="180" height="46" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="570" y="89" font-weight="700" fill="var(--fg)">要出圖 / 影片 / 網頁？</text><text x="570" y="106" font-size="11" fill="var(--muted)">→ creative 11</text>
+<rect x="680" y="70" width="180" height="46" rx="9" fill="none" stroke="#6366f1" stroke-width="1.6"/><text x="770" y="89" font-weight="700" fill="var(--fg)">要查資料 / 論文？</text><text x="770" y="106" font-size="11" fill="var(--muted)">→ research 6</text>
+<rect x="80" y="140" width="180" height="52" rx="9" fill="#eef2ff"/><text x="170" y="159" font-weight="700" fill="var(--fg)">debug → systematic</text><text x="170" y="176" font-size="11" fill="var(--muted)">TDD→tdd・審查→review</text>
+<rect x="280" y="140" width="180" height="52" rx="9" fill="#eef2ff"/><text x="370" y="159" font-weight="700" fill="var(--fg)">會議→meeting-action</text><text x="370" y="176" font-size="11" fill="var(--muted)">公式PDF→technical</text>
+<rect x="480" y="140" width="180" height="52" rx="9" fill="#eef2ff"/><text x="570" y="159" font-weight="700" fill="var(--fg)">架構圖/資訊圖表</text><text x="570" y="176" font-size="11" fill="var(--muted)">本報告→chart-delivery</text>
+<rect x="680" y="140" width="180" height="52" rx="9" fill="#eef2ff"/><text x="770" y="159" font-weight="700" fill="var(--fg)">論文→arxiv+引用</text><text x="770" y="176" font-size="11" fill="var(--muted)">競品→news-monitor</text>
+<rect x="230" y="220" width="440" height="90" rx="10" fill="none" stroke="#22c55e" stroke-width="1.8"/>
+<text x="450" y="243" font-weight="800" fill="#16a34a">都不像？三個通用開關 →</text>
+<text x="450" y="264" font-size="12" fill="var(--fg)">Hermes 本體問題 → <tspan font-weight="700">hermes-agent</tspan> ・ 模型報錯 → <tspan font-weight="700">llm-provider-troubleshooting</tspan></text>
+<text x="450" y="284" font-size="12" fill="var(--fg)">網頁被擋 → <tspan font-weight="700">blocked-page-recovery</tspan> ・ 不確定 → 直接描述任務，模型自動選</text>
+</g>
+<g stroke="#c7d2fe" stroke-width="1.5">
+<line x1="450" y1="48" x2="170" y2="70"/><line x1="450" y1="48" x2="370" y2="70"/><line x1="450" y1="48" x2="570" y2="70"/><line x1="450" y1="48" x2="770" y2="70"/>
+<line x1="170" y1="116" x2="170" y2="140"/><line x1="370" y1="116" x2="370" y2="140"/><line x1="570" y1="116" x2="570" y2="140"/><line x1="770" y1="116" x2="770" y2="140"/>
+</g>
+</svg>
+<div class="decision">🧭 <q>我是 SI 工程師，最常用哪幾個？</q> → <code>technical-reporting</code>（含公式 PDF）＋ <code>python/pptx・xlsx・docx</code>（量測整理）＋ <code>arxiv + grounded-citations</code>（文獻）＋ <code>systematic-debugging</code>（量測/模擬除錯思維）＋ <code>hermes-chart-delivery</code>（波形圖交付）。</div>
+</div>
+
+<h2 id="s6">6. 黃金組合：4 條實戰 workflow</h2>
+<div class="cols2">
+<div class="card"><h3>📝 A. 論文研讀管線</h3><p><code>arxiv</code> 找文獻 → <code>grounded-citations</code> 寫摘要（每段掛來源）→ <code>obsidian</code> 存知識庫 → <code>technical-reporting</code> 出 PDF。適合追 SI / 高速文獻。</p></div>
+<div class="card"><h3>📊 B. 會議 → 交付管線</h3><p><code>teams-meeting-pipeline</code> 轉逐字稿 → <code>meeting-action-items</code> 萃待辦 → <code>notion / google-workspace</code> 同步行事曆 → <code>weekly-review-planning</code> 週覆盤。</p></div>
+<div class="card"><h3>🐞 C. 除錯管線</h3><p><code>systematic-debugging</code> 定位根因 → <code>spike</code> 小實驗驗證 → <code>test-driven-development</code> 補測試 → <code>requesting-code-review</code> 審查 → <code>github</code> 開 PR（可經 <code>claude-code / codex / opencode</code> 委派）。</p></div>
+<div class="card"><h3>🎨 D. 視覺交付管線</h3><p><code>architecture-diagram / baoyu-infographic</code> 出圖 → <code>popular-web-designs / claude-design</code> 包成 HTML → <code>hermes-chart-delivery</code> 規範交付（MEDIA / ::preview）。本報告即 D 管線產物。</p></div>
+</div>
+
+<h2 id="s7">7. 管理指令速查</h2>
+<div class="card">
+<table><tr><th>想做什麼</th><th>指令</th></tr>
+<tr><td>看已安裝</td><td><code>hermes skills list</code></td></tr>
+<tr><td>開關個別 skill</td><td><code>hermes skills config</code></td></tr>
+<tr><td>逛 / 搜尋 / 安裝更多</td><td><code>hermes skills browse</code>・<code>search</code>・<code>install</code></td></tr>
+<tr><td>看改過什麼</td><td><code>hermes skills list-modified</code>・<code>diff</code>・<code>reset</code></td></tr>
+<tr><td>停用官方預設帶入</td><td><code>hermes skills opt-out</code> / <code>opt-in</code></td></tr>
+<tr><td>對話內載入全文</td><td><code>skill_view(name)</code>（模型側工具）</td></tr>
+<tr><td>自訂 skill</td><td>載入 <code>hermes-agent-skill-authoring</code> 後按 SKILL.md 規範寫</td></tr>
+</table>
+<div class="warn">⚠️ 本機實測：<code>hermes skills list</code> 顯示 <b>53 builtin + 5 local</b>。5 個 local（<code>llm-provider-troubleshooting / hermes-chart-delivery / llm-model-selection / technical-reporting / local-ai-model-fit</code>）是你這台改過或自加的，<code>hermes update</code> 會保留但可能提示 diff，先 <code>diff</code> 再更新。</div>
+</div>
+
+<h2 id="s8">8. 未啟用 7 個：平台限定說明</h2>
+<div class="card">
+<table><tr><th>Skill</th><th>中文</th><th>為何沒啟用</th></tr>
+<tr><td><code>apple-notes / apple-reminders / findmy / imessage</code></td><td>Apple Notes / Reminders / FindMy / iMessage</td><td>macOS 限定（需 memo / remindctl / imsg），Windows 本機無用，先放著</td></tr>
+<tr><td><code>sdlc-review</code></td><td>Kanban 交付覆核路由</td><td>需 kanban toolset，有跑看板才 opt-in</td></tr>
+<tr><td><code>python-debugpy</code></td><td>Python 除錯（pdb + debugpy DAP）</td><td>通用可選；標註 linux/macos，有需要再裝</td></tr>
+<tr><td><code>xurl</code></td><td>X/Twitter 官方 CLI（搜尋/發文/DM/媒體）</td><td>需 xurl + API key，標註 linux/macos</td></tr>
+</table>
+<p style="color:var(--muted);font-size:13px">需要時：<code>hermes skills opt-in</code> 或 <code>hermes skills repair-official</code> 補回。切 profile（default / dailychicken / pcb-expert）要重看一次 list，因為 skill seeding 是 per-profile。</p>
+</div>
+
+<h2 id="s9">9. 附錄：65 列完整清單（含未啟用）</h2>
+<div class="card">
+<table><tr><th>#</th><th>分類</th><th>Skill</th><th>狀態</th><th>一句話</th></tr>
+<tr><td>1</td><td>代理</td><td><code>claude-code</code></td><td>✅ builtin</td><td>委派 Claude Code 寫碼/修 PR</td></tr>
+<tr><td>2</td><td>代理</td><td><code>codex</code></td><td>✅ builtin</td><td>委派 OpenAI Codex</td></tr>
+<tr><td>3</td><td>代理</td><td><code>computer-use</code></td><td>✅ builtin</td><td>桌面自動操作</td></tr>
+<tr><td>4</td><td>代理</td><td><code>hermes-agent</code></td><td>✅ builtin</td><td>Hermes 設定/主題/擴充總手冊</td></tr>
+<tr><td>5</td><td>代理</td><td><code>llm-provider-troubleshooting</code></td><td>✅ local</td><td>模型供應商排錯</td></tr>
+<tr><td>6</td><td>代理</td><td><code>opencode</code></td><td>✅ builtin</td><td>委派 OpenCode</td></tr>
+<tr><td>7</td><td>創意</td><td><code>architecture-diagram</code></td><td>✅ builtin</td><td>深色架構圖</td></tr>
+<tr><td>8</td><td>創意</td><td><code>ascii-video</code></td><td>✅ builtin</td><td>ASCII 影片/GIF</td></tr>
+<tr><td>9</td><td>創意</td><td><code>baoyu-infographic</code></td><td>✅ builtin</td><td>21×21 資訊圖</td></tr>
+<tr><td>10</td><td>創意</td><td><code>claude-design</code></td><td>✅ builtin</td><td>Landing/Deck/原型</td></tr>
+<tr><td>11</td><td>創意</td><td><code>design-md</code></td><td>✅ builtin</td><td>DESIGN.md 權杖</td></tr>
+<tr><td>12</td><td>創意</td><td><code>hermes-chart-delivery</code></td><td>✅ local</td><td>圖表交付規範</td></tr>
+<tr><td>13</td><td>創意</td><td><code>humanizer</code></td><td>✅ builtin</td><td>去 AI 味</td></tr>
+<tr><td>14</td><td>創意</td><td><code>manim-video</code></td><td>✅ builtin</td><td>數學動畫</td></tr>
+<tr><td>15</td><td>創意</td><td><code>p5js</code></td><td>✅ builtin</td><td>生成藝術/3D</td></tr>
+<tr><td>16</td><td>創意</td><td><code>popular-web-designs</code></td><td>✅ builtin</td><td>54 設計復刻</td></tr>
+<tr><td>17</td><td>創意</td><td><code>songwriting-and-ai-music</code></td><td>✅ builtin</td><td>作詞+Suno</td></tr>
+<tr><td>18</td><td>郵件</td><td><code>email-inbox-triage</code></td><td>✅ builtin</td><td>信箱分流</td></tr>
+<tr><td>19</td><td>郵件</td><td><code>himalaya</code></td><td>✅ builtin</td><td>終端收發信</td></tr>
+<tr><td>20</td><td>影音</td><td><code>gif-search</code></td><td>✅ builtin</td><td>GIF 搜尋</td></tr>
+<tr><td>21</td><td>影音</td><td><code>songsee</code></td><td>✅ builtin</td><td>音訊頻譜</td></tr>
+<tr><td>22</td><td>影音</td><td><code>youtube-content</code></td><td>✅ builtin</td><td>YT 轉摘要</td></tr>
+<tr><td>23</td><td>筆記</td><td><code>obsidian</code></td><td>✅ builtin</td><td>Obsidian 操作</td></tr>
+<tr><td>24–39</td><td>生產力</td><td><code>airtable・box・document-to-action-items・docx・google-workspace・llm-model-selection(local)・maps・meeting-action-items・notion・pdf・powerpoint・product-price-monitor・teams-meeting-pipeline・technical-reporting(local)・weekly-review-planning・xlsx</code></td><td>✅ 16 啟用</td><td>見 §4 表</td></tr>
+<tr><td>40</td><td>研究</td><td><code>arxiv</code></td><td>✅ builtin</td><td>論文檢索</td></tr>
+<tr><td>41</td><td>研究</td><td><code>competitor-news-monitor</code></td><td>✅ builtin</td><td>競品監控</td></tr>
+<tr><td>42</td><td>研究</td><td><code>grounded-citations</code></td><td>✅ builtin</td><td>有據引用</td></tr>
+<tr><td>43</td><td>研究</td><td><code>llm-wiki</code></td><td>✅ builtin</td><td>互聯知識庫</td></tr>
+<tr><td>44</td><td>研究</td><td><code>local-ai-model-fit</code></td><td>✅ local</td><td>本機模型選型</td></tr>
+<tr><td>45</td><td>研究</td><td><code>rss-feeds</code></td><td>✅ builtin</td><td>RSS 訂閱</td></tr>
+<tr><td>46</td><td>社群</td><td><code>reddit-reading</code></td><td>✅ builtin</td><td>讀 Reddit</td></tr>
+<tr><td>47</td><td>社群</td><td><code>xurl</code></td><td>💤 落盤未啟用</td><td>X/Twitter CLI</td></tr>
+<tr><td>48–58</td><td>開發</td><td><code>codebase-inspection・dogfood・github・hermes-agent-skill-authoring・inspecting-hermes-desktop-dom・node-inspect-debugger・requesting-code-review・simplify-code・spike・systematic-debugging・test-driven-development</code></td><td>✅ 11 啟用</td><td>見 §4 表</td></tr>
+<tr><td>59</td><td>開發</td><td><code>python-debugpy</code></td><td>💤 落盤未啟用</td><td>Python 除錯</td></tr>
+<tr><td>60</td><td>DevOps</td><td><code>sdlc-review</code></td><td>💤 落盤未啟用</td><td>Kanban 覆核</td></tr>
+<tr><td>61–64</td><td>Apple</td><td><code>apple-notes・apple-reminders・findmy・imessage</code></td><td>💤 macOS 限定</td><td>見 §8</td></tr>
+<tr><td>65</td><td>Web</td><td><code>blocked-page-recovery</code></td><td>✅ builtin</td><td>被擋頁面救援</td></tr>
+</table>
+</div>
+
+<footer>產出方式：本機 <code>hermes --version</code>（v0.21.1）＋ <code>hermes skills list</code>（58 enabled）＋ 落盤 <code>SKILL.md</code> 65 個交叉核對。5 個 local 為本機自訂，更新前建議 <code>hermes skills diff</code>。如需英文原文或某 skill 全文，打開 <code>C:/Users/joezi/AppData/Local/hermes/skills/&lt;分類&gt;/&lt;名稱&gt;/SKILL.md</code> 或在對話中叫我 <code>skill_view()</code> 展開。</footer>
+</body>
+</html>

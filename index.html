@@ -287,6 +287,15 @@ rea setup   # 註冊到你的 agent（Claude Code / Codex / Cursor / Gemini CLI�
 // ===== 報告清單：新增報告只要在對應陣列最前面加一筆 =====
 const REPORTS_AI = [
   {
+    date: "2026-09-16",
+    title: "Hermes Agent v0.21.1 預設 Skill 完整盤點",
+    summary: "58 個已啟用 skill（53 builtin＋5 local）全盤點：分類分佈圖、Skill 載入原理、任務→Skill 決策流程、四條實戰管線與 65 列完整清單，附流程圖與架構示意圖。",
+    tags: ["AI 工具", "Agent", "Skill"],
+    format: "html",
+    href: "reports/2026-09-16_hermes-skills-report/",
+    src: "原檔：僅 index.html（自包含單檔）"
+  },
+  {
     date: "2026-10-12",
     title: "Karpathy：四層認知漏斗，2000 萬人陷「AI 代理眩暈區」",
     summary: "大眾對 LLM 能力的認知從兩極變成四層斷崖：60 億真空區、初級輔助層、2000 萬人眩暈區、5000 人內部禁區，附資訊圖。原文以連結提供，不轉載內文。",
@@ -450,7 +459,7 @@ const REPORTS_LLM = [
   renderLists();
   renderChips();
   render();
-  document.getElementById("updated").textContent = "最後更新：2026-10-12";
+  document.getElementById("updated").textContent = "最後更新：2026-10-13";
 })();
 </script>
 </body>
