@@ -1,0 +1,82 @@
+{
+  "site": "RD-JoeAI",
+  "url": "https://jwai-partner.github.io/RD-JoeAI/",
+  "cats": [
+    "Architecture",
+    "AI tool list",
+    "LLM Model"
+  ],
+  "updated": "2026-10-16",
+  "reports": [
+    {
+      "date": "2026-10-12",
+      "title": "Karpathy：四層認知漏斗，2000 萬人陷「AI 代理眩暈區」",
+      "summary": "大眾對 LLM 能力的認知從兩極變成四層斷崖：60 億真空區、初級輔助層、2000 萬人眩暈區、5000 人內部禁區，附資訊圖。原文以連結提供，不轉載內文。",
+      "tags": [
+        "AI 產業",
+        "LLM",
+        "Agent"
+      ],
+      "format": "html",
+      "href": "reports/2026-10-12_karpathy-cognition-funnel/"
+    },
+    {
+      "date": "2026-10-02",
+      "title": "OpenRouter 模型選型指南",
+      "summary": "以 OpenCode Go 四選為基準，比較 OpenRouter 模型的每成功成本、困難任務解題率與社群評論，給出 Go 為主、OpenRouter 補位的組合。",
+      "tags": [
+        "AI 工具",
+        "模型選型"
+      ],
+      "format": "html",
+      "href": "reports/2026-10-02_openrouter-model-guide/"
+    },
+    {
+      "date": "2026-10-01",
+      "title": "AIVM1 本地 RAG 系統手冊",
+      "summary": "Open WebUI + pgvector + Ollama 本地知識庫的架構、Docker 名詞、資料流程、設定與日常維運。",
+      "tags": [
+        "系統架構",
+        "AI 工具",
+        "RAG"
+      ],
+      "format": "html",
+      "href": "reports/2026-10-01_aivm1-rag-manual/"
+    },
+    {
+      "date": "2026-09-29",
+      "title": "OpenCode Go 深度研究模型選型",
+      "summary": "深度研究任務（精準分析＋完整報告）該用哪個模型？把寫碼的 Pareto 換成 HLE × 智能指數 × 每成功成本，從 32 個模型中選出首選三模型，含讀圖、資料保留、額度試算與 Hermes 設定建議。",
+      "tags": [
+        "AI 工具",
+        "模型選型",
+        "深度研究"
+      ],
+      "format": "html",
+      "href": "reports/2026-09-29_opencode-go-deep-research/"
+    },
+    {
+      "date": "2026-09-24",
+      "title": "OpenCode Go 模型選擇指南",
+      "summary": "$10/月方案怎麼選模型：以每成功任務成本 × 困難任務解題率 × 額度，比較 32 個模型並給出建議設定。",
+      "tags": [
+        "AI 工具",
+        "模型選型"
+      ],
+      "format": "html",
+      "href": "reports/2026-09-24_opencode-go-guide/"
+    },
+    {
+      "date": "2026-09-16",
+      "title": "Hermes Agent v0.21.1 預設 Skill 完整盤點",
+      "summary": "58 個已啟用 skill（53 builtin＋5 local）全盤點：分類分佈圖、Skill 載入原理、任務→Skill 決策流程、四條實戰管線與 65 列完整清單，附流程圖與架構示意圖。",
+      "tags": [
+        "AI 工具",
+        "Agent",
+        "Skill"
+      ],
+      "format": "html",
+      "href": "reports/2026-09-16_hermes-skills-report/"
+    }
+  ]
+}
